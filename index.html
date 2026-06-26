@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central de Links - Conecte-se Comigo</title>
+    
+    <!-- Metadados de SEO -->
+    <meta name="description" content="Centralizador de links profissional e interativo. Acesse minhas redes sociais, portfólio, projetos e canais de contato em um só lugar.">
+    <meta name="keywords" content="linktree, central de links, links, portfólio, desenvolvedor, designer, contato">
+    <meta name="author" content="Bruno Santos">
+    
+    <!-- Open Graph (Redes Sociais) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Central de Links Profissional">
+    <meta property="og:description" content="Acesse minhas redes sociais, projetos recentes e meios de contato.">
+    <meta property="og:image" content="profile_avatar.png">
+    
+    <!-- Fontes do Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Estilo Principal -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Fundo abstrato com círculos de gradiente desfocados -->
+    <div class="background-decorations">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Barra superior / Ações -->
+        <header class="top-bar">
+            <button id="theme-toggle" class="icon-btn" aria-label="Alternar tema visual" title="Alternar tema">
+                <i data-lucide="sun" class="sun-icon"></i>
+                <i data-lucide="moon" class="moon-icon"></i>
+            </button>
+        </header>
+
+        <!-- Seção de Perfil -->
+        <section class="profile-section">
+            <div class="avatar-container">
+                <img id="profile-avatar" src="profile_avatar.png" alt="Foto de perfil" class="profile-avatar hidden">
+                <div id="profile-avatar-fallback" class="profile-avatar-fallback">BS</div>
+            </div>
+            <h1 id="profile-name" class="profile-name">Bruno Santos</h1>
+            <p id="profile-role" class="profile-role">Desenvolvedor & Designer</p>
+            <p id="profile-bio" class="profile-bio">Carregando informações do perfil...</p>
+            
+            <!-- Redes Sociais do Perfil -->
+            <nav id="profile-socials" class="socials-nav" aria-label="Links de redes sociais">
+                <!-- Inserido dinamicamente via JS -->
+            </nav>
+        </section>
+
+        <main class="main-content">
+            <!-- Barra de Pesquisa e Filtros -->
+            <section class="controls-section">
+                <div class="search-wrapper">
+                    <i data-lucide="search" class="search-icon"></i>
+                    <input type="text" id="search-input" placeholder="Pesquisar links ou habilidades..." aria-label="Pesquisar links">
+                    <button id="clear-search" class="clear-search-btn hidden" aria-label="Limpar pesquisa">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+                
+                <!-- Categorias dinâmicas -->
+                <nav id="categories-nav" class="categories-nav" aria-label="Filtrar links por categoria">
+                    <!-- Inserido dinamicamente via JS -->
+                </nav>
+            </section>
+
+            <!-- Seção de Estatísticas Locais (Mais Visitados) -->
+            <section id="popular-section" class="popular-section hidden">
+                <div class="section-title-wrapper">
+                    <i data-lucide="zap" class="title-icon"></i>
+                    <h2>Links Mais Visitados</h2>
+                </div>
+                <div id="popular-grid" class="popular-grid">
+                    <!-- Inserido dinamicamente via JS -->
+                </div>
+            </section>
+
+            <!-- Lista Principal de Links -->
+            <section class="links-section">
+                <div class="section-title-wrapper">
+                    <i data-lucide="list" class="title-icon"></i>
+                    <h2 id="list-title">Todos os Links</h2>
+                </div>
+                
+                <!-- Feedback de carregamento ou vazio -->
+                <div id="status-message" class="status-message hidden">
+                    <div class="spinner"></div>
+                    <p>Carregando links...</p>
+                </div>
+
+                <div id="links-grid" class="links-grid">
+                    <!-- Inserido dinamicamente via JS -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Rodapé -->
+        <footer class="app-footer">
+            <p>&copy; <span id="copyright-year">2026</span> • <span id="footer-name">Bruno Santos</span></p>
+            <p class="watermark">Desenvolvido com <i data-lucide="heart" class="heart-icon"></i> e tecnologia premium</p>
+        </footer>
+    </div>
+
+    <!-- Script de Ícones Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Script da Aplicação -->
+    <script src="app.js"></script>
+</body>
+</html>
