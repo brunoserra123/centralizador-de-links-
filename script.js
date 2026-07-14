@@ -34,7 +34,12 @@ function getLinks() {
 
 function createLinkCard(link, index) {
     const a = document.createElement('a');
-    a.href = link.url;
+    
+    let finalUrl = link.url ? link.url.trim() : "";
+    if (finalUrl && !finalUrl.startsWith('http://') && !finalUrl.startsWith('https://')) {
+        finalUrl = 'https://' + finalUrl;
+    }
+    a.href = finalUrl;
     a.target = "_blank"; // Abre em nova aba
     a.rel = "noopener noreferrer"; // Segurança
     a.className = "link-card";
