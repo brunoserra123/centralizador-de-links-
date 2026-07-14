@@ -51,6 +51,15 @@ function createLinkCard(link, index) {
         iconContent = `<img src="${link.icon.trim()}" alt="Ícone" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;">`;
     } else if (link.image) {
         iconContent = `<img src="${link.image}" alt="Ícone" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;">`;
+    } else if (!link.icon || link.icon.trim() === '') {
+        // Busca automaticamente o ícone do site usando a API do Google
+        try {
+            const urlObj = new URL(finalUrl);
+            const faviconUrl = `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=64`;
+            iconContent = `<img src="${faviconUrl}" alt="Ícone" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;">`;
+        } catch(e) {
+            iconContent = '🌐';
+        }
     }
 
     a.innerHTML = `
