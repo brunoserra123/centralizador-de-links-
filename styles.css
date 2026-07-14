@@ -367,3 +367,19 @@ header p {
     background: var(--accent-1);
     border-color: var(--accent-1);
 }
+
+/* Categories */
+.category-section {
+    margin-bottom: 3rem;
+    width: 100%;
+}
+
+.category-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--card-border);
+    padding-bottom: 0.5rem;
+    display: inline-block;
+}

@@ -45,8 +45,12 @@ function createLinkCard(link, index) {
     a.className = "link-card";
 
     let iconContent = link.icon;
-    if (link.image) {
-        iconContent = `<img src="${link.image}" alt="Ícone">`;
+    
+    // Se o ícone for um link de imagem ou arquivo (ex: .webp, .png, .jpg)
+    if (link.icon && /\.(webp|png|jpg|jpeg|gif|svg)(\?.*)?$/i.test(link.icon.trim())) {
+        iconContent = `<img src="${link.icon.trim()}" alt="Ícone" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;">`;
+    } else if (link.image) {
+        iconContent = `<img src="${link.image}" alt="Ícone" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;">`;
     }
 
     a.innerHTML = `
@@ -61,19 +65,46 @@ function createLinkCard(link, index) {
 }
 
 function renderLinks() {
-    const grid = document.getElementById('links-grid');
-    grid.innerHTML = ''; // Limpa a grade
+    const container = document.getElementById('categories-container');
+    container.innerHTML = ''; // Limpa a grade
     const linksData = getLinks();
 
     if (linksData.length === 0) {
-        grid.innerHTML = '<p style="text-align: center; color: white; width: 100%;">Nenhum link encontrado. Adicione no arquivo links.json!</p>';
+        container.innerHTML = '<p style="text-align: center; color: white; width: 100%;">Nenhum link encontrado. Adicione no arquivo links.csv!</p>';
         return;
     }
 
-    linksData.forEach((link, index) => {
-        const card = createLinkCard(link, index);
-        grid.appendChild(card);
+    // Agrupar por categoria
+    const categories = {};
+    linksData.forEach(link => {
+        const cat = link.category ? link.category.trim() : 'Geral';
+        if (!categories[cat]) {
+            categories[cat] = [];
+        }
+        categories[cat].push(link);
     });
+
+    // Renderizar cada categoria
+    for (const [catName, catLinks] of Object.entries(categories)) {
+        const section = document.createElement('div');
+        section.className = 'category-section';
+        
+        const title = document.createElement('h2');
+        title.className = 'category-title';
+        title.innerText = catName;
+        section.appendChild(title);
+        
+        const grid = document.createElement('div');
+        grid.className = 'links-grid';
+        
+        catLinks.forEach((link, index) => {
+            const card = createLinkCard(link, index);
+            grid.appendChild(card);
+        });
+        
+        section.appendChild(grid);
+        container.appendChild(section);
+    }
 }
 
 // Configuração do Botão
