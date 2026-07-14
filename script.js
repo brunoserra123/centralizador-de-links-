@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbxitpUj0jLocXvNK8kHpCml7yeK9d693MO6m0Bl8pWcIUl0Ztloqu2Zh0tiDDcz2bWg6A/exec"; // Cole aqui o URL que termina com /exec
+const API_URL = "https://script.google.com/macros/s/AKfycbzPUxqLoBVrkvijdCEGqgYmZythctZmUzbwffRpo0bXC27A0YyAGH-CsOjQZW9TJbjg/exec"; // Cole aqui o URL que termina com /exec
 
 const defaultLinks = [
     {
