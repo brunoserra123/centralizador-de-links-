@@ -1,3 +1,5 @@
+const API_URL = "https://script.google.com/macros/s/AKfycbxitpUj0jLocXvNK8kHpCml7yeK9d693MO6m0Bl8pWcIUl0Ztloqu2Zh0tiDDcz2bWg6A/exec"; // Cole aqui o URL que termina com /exec
+
 const defaultLinks = [
     {
         title: "Thingiverse",
@@ -25,18 +27,63 @@ const defaultLinks = [
     }
 ];
 
-// Carrega os links do localStorage ou usa os padrões
-function getLinks() {
-    const savedLinks = localStorage.getItem('myFavoriteLinks');
-    if (savedLinks) {
-        return JSON.parse(savedLinks);
+// Estado global para armazenar os links na memória
+let currentLinks = [];
+
+// Busca os links da planilha (Google Sheets)
+async function fetchLinks() {
+    if (!API_URL || API_URL === "COLE_O_SEU_LINK_AQUI_DEPOIS") {
+        console.warn("API_URL não configurada. Usando links padrão da memória.");
+        currentLinks = JSON.parse(JSON.stringify(defaultLinks));
+        renderLinks();
+        return;
     }
-    return JSON.parse(JSON.stringify(defaultLinks));
+
+    try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+        currentLinks = data;
+        renderLinks();
+    } catch (err) {
+        console.error("Erro ao buscar links da planilha:", err);
+        // Fallback
+        if (currentLinks.length === 0) {
+            currentLinks = JSON.parse(JSON.stringify(defaultLinks));
+        }
+        renderLinks();
+    }
 }
 
-// Salva os links no localStorage
-function saveLinks(links) {
-    localStorage.setItem('myFavoriteLinks', JSON.stringify(links));
+// Retorna os links atuais da memória
+function getLinks() {
+    return currentLinks;
+}
+
+// Salva a alteração (Adicionar, Editar ou Deletar) na Planilha
+async function syncWithServer(action, linkData) {
+    if (!API_URL || API_URL === "COLE_O_SEU_LINK_AQUI_DEPOIS") {
+        return;
+    }
+    
+    try {
+        await fetch(API_URL, {
+            method: 'POST',
+            mode: 'no-cors', // Evita bloqueio do navegador (CORS)
+            headers: {
+                'Content-Type': 'text/plain'
+            },
+            body: JSON.stringify({ action: action, data: linkData })
+        });
+        
+        // Dá um pequeno tempo para a planilha processar antes de recarregar
+        setTimeout(async () => {
+            await fetchLinks();
+        }, 1500);
+        
+    } catch (err) {
+        console.error("Erro ao sincronizar com servidor:", err);
+        alert("Aviso: Houve um erro ao salvar na planilha, mas a alteração está visível na tela.");
+    }
 }
 
 function createLinkCard(link, index) {
@@ -112,14 +159,18 @@ function setupModal() {
     });
 
     // Deletar Link
-    deleteBtn.addEventListener('click', () => {
-        const id = document.getElementById('link-id').value;
-        if (id !== "") {
-            const currentLinks = getLinks();
-            currentLinks.splice(Number(id), 1);
-            saveLinks(currentLinks);
+    deleteBtn.addEventListener('click', async () => {
+        const index = document.getElementById('link-id').value;
+        if (index !== "") {
+            const linkToDelete = currentLinks[Number(index)];
+            
+            // Remove da tela imediatamente para parecer rápido
+            currentLinks.splice(Number(index), 1);
             renderLinks();
             modalOverlay.classList.remove('active');
+            
+            // Sincroniza em segundo plano
+            await syncWithServer('delete', linkToDelete);
         }
     });
 
@@ -132,19 +183,16 @@ function setupModal() {
             const description = document.getElementById('link-desc').value;
             let url = document.getElementById('link-url').value;
             
-            // Garante que o link tenha http:// ou https://
             if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
                 url = 'https://' + url;
             }
 
             const icon = document.getElementById('link-icon').value || "🔗";
             const imageFile = document.getElementById('link-image').files[0];
-            const linkId = document.getElementById('link-id').value;
+            const indexStr = document.getElementById('link-id').value;
 
-            const saveAndRender = (imageBase64) => {
+            const saveAndRender = async (imageBase64) => {
                 try {
-                    const currentLinks = getLinks();
-                    
                     const newLink = {
                         title,
                         description,
@@ -153,25 +201,32 @@ function setupModal() {
                         image: imageBase64 || null
                     };
 
-                    // Mantém a imagem antiga se não enviou uma nova e já tinha uma
-                    if (!imageBase64 && linkId !== "" && currentLinks[linkId] && currentLinks[linkId].image && !document.getElementById('link-icon').value) {
-                        newLink.image = currentLinks[linkId].image;
+                    if (!imageBase64 && indexStr !== "" && currentLinks[indexStr] && currentLinks[indexStr].image && !document.getElementById('link-icon').value) {
+                        newLink.image = currentLinks[indexStr].image;
                         newLink.icon = "";
                     }
 
-                    if (linkId === "") {
-                        // É um link novo
+                    let action = 'add';
+                    
+                    if (indexStr === "") {
                         currentLinks.push(newLink);
                     } else {
-                        // É uma edição
-                        currentLinks[Number(linkId)] = newLink;
+                        // O ID interno da planilha, se existir, precisamos manter ao editar
+                        if (currentLinks[Number(indexStr)].id) {
+                            newLink.id = currentLinks[Number(indexStr)].id;
+                        }
+                        currentLinks[Number(indexStr)] = newLink;
+                        action = 'update';
                     }
 
-                    saveLinks(currentLinks);
+                    // Atualiza a tela rápido
                     renderLinks();
-
                     form.reset();
                     modalOverlay.classList.remove('active');
+                    
+                    // Sincroniza com a planilha
+                    await syncWithServer(action, newLink);
+
                 } catch (err2) {
                     alert("Erro ao salvar os dados: " + err2.message);
                 }
@@ -205,7 +260,6 @@ function setupModal() {
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
                         
-                        // Converte para WebP (ou PNG se WebP falhar) comprimido
                         const dataUrl = canvas.toDataURL('image/webp', 0.8);
                         saveAndRender(dataUrl);
                     };
@@ -225,8 +279,7 @@ function setupModal() {
 }
 
 function openEditModal(index) {
-    const linksData = getLinks();
-    const link = linksData[index];
+    const link = currentLinks[index];
     
     document.getElementById('link-id').value = index;
     document.getElementById('link-title').value = link.title;
@@ -241,8 +294,8 @@ function openEditModal(index) {
     modalOverlay.classList.add('active');
 }
 
-// Renderiza os links e configura o modal quando a página carregar
+// Carrega os dados na inicialização
 document.addEventListener('DOMContentLoaded', () => {
-    renderLinks();
+    fetchLinks();
     setupModal();
 });
