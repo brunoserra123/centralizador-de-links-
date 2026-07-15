@@ -119,6 +119,7 @@ function renderLinks() {
 // Configuração do Botão
 function setupUI() {
     const addBtn = document.getElementById('add-link-btn');
+    const updateBtn = document.getElementById('update-site-btn');
 
     // Como é estático e lido do Excel/Planilha, o botão avisa o usuário
     if (addBtn) {
@@ -128,6 +129,31 @@ function setupUI() {
         
         // Ou podemos mudar o texto do botão
         addBtn.innerText = "Como Adicionar?";
+    }
+
+    if (updateBtn) {
+        updateBtn.addEventListener('click', async () => {
+            const originalText = updateBtn.innerText;
+            updateBtn.innerText = "⏳ Atualizando...";
+            updateBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/atualizar', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert("🎉 FEITO! Tudo atualizado!\nO seu site estara com os novos links no ar em 1 a 2 minutos.");
+                } else {
+                    alert("⚠️ Erro ao atualizar: " + result.message);
+                }
+            } catch (err) {
+                console.error("Erro ao chamar a API:", err);
+                alert("⚠️ Erro de conexão! Certifique-se de que o servidor local (server.js) está rodando.");
+            } finally {
+                updateBtn.innerText = originalText;
+                updateBtn.disabled = false;
+            }
+        });
     }
 }
 
