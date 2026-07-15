@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel - Gerenciador de Links</title>
+    <HTA:APPLICATION 
+        APPLICATIONNAME="PainelLinks" 
+        SCROLL="no" 
+        SINGLEINSTANCE="yes" 
+        WINDOWSTATE="normal"
+        BORDER="dialog"
+        INNERBORDER="no"
+        SYSMENU="yes"
+    >
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 30px;
+            max-width: 80%;
+        }
+        button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: background 0.2s;
+        }
+        button:hover {
+            background-color: #2563eb;
+        }
+        button:active {
+            background-color: #1d4ed8;
+        }
+    </style>
+    <script>
+        // Redimensionar a janela ao abrir
+        window.resizeTo(450, 350);
+
+        function atualizarSite() {
+            var btn = document.getElementById("btn-update");
+            btn.innerText = "⏳ Atualizando...";
+            btn.disabled = true;
+            btn.style.backgroundColor = "#64748b";
+
+            setTimeout(function() {
+                try {
+                    // Executa o .bat invisível (0) ou visível (1). Usando 1 para mostrar o progresso caso ele queira ver.
+                    var shell = new ActiveXObject("WScript.Shell");
+                    shell.Run("cmd.exe /c atualizar_site.bat", 1, true); // true = espera terminar
+                    
+                    alert("🎉 FEITO! Tudo atualizado!\nSeus links estarão no ar em 1 a 2 minutos.");
+                } catch (e) {
+                    alert("⚠️ Erro ao atualizar: " + e.message + "\nCertifique-se de que o atualizar_site.bat está na mesma pasta.");
+                }
+                
+                btn.innerText = "🚀 Atualizar Site no Ar";
+                btn.disabled = false;
+                btn.style.backgroundColor = "#3b82f6";
+            }, 500); // pequeno delay para a UI atualizar
+        }
+    </script>
+</head>
+<body>
+    <h1>Painel de Atualização</h1>
+    <p>Use este painel para enviar seus novos links do arquivo links.csv diretamente para o seu site no GitHub Pages.</p>
+    <button id="btn-update" onclick="atualizarSite()">🚀 Atualizar Site no Ar</button>
+</body>
+</html>
