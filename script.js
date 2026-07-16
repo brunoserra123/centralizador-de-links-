@@ -119,6 +119,7 @@ function renderLinks() {
 // Configuração do Botão
 function setupUI() {
     const addBtn = document.getElementById('add-link-btn');
+    const refreshBtn = document.getElementById('refresh-btn');
 
     // Como é estático e lido do Excel/Planilha, o botão avisa o usuário
     if (addBtn) {
@@ -128,6 +129,17 @@ function setupUI() {
         
         // Ou podemos mudar o texto do botão
         addBtn.innerText = "Como Adicionar?";
+    }
+
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+            refreshBtn.innerText = "Atualizando...";
+            fetchLinks().then(() => {
+                setTimeout(() => {
+                    refreshBtn.innerText = "Atualizar";
+                }, 500);
+            });
+        });
     }
 }
 
