@@ -16,7 +16,6 @@ if %errorlevel% neq 0 (
 
 git add .
 git commit -m "Atualizacao de links" >nul 2>&1
-git pull origin main --rebase
 git push origin main
 
 if %errorlevel% equ 0 (
