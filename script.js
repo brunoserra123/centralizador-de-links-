@@ -19,8 +19,10 @@ async function fetchLinks() {
             header: true,
             skipEmptyLines: true,
             complete: function(results) {
-                const csvLinks = results.data;
-                currentLinks = mergeLinks(csvLinks, localCustomLinks);
+                const parsed = results.data
+                    .map(normalizeLink)
+                    .filter(item => item !== null && (item.title || item.url));
+                currentLinks = mergeLinks(parsed, localCustomLinks);
                 renderLinks();
             }
         });
@@ -34,13 +36,37 @@ async function fetchLinks() {
     }
 }
 
+// Normaliza os nomes das colunas (aceita maiúsculas, minúsculas, acentos e nomes em PT-BR)
+function normalizeLink(rawLink) {
+    if (!rawLink || typeof rawLink !== 'object') return null;
+    const link = {};
+    for (const key of Object.keys(rawLink)) {
+        if (key) {
+            const cleanKey = key.trim().toLowerCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // remove acentos (ex: descrição -> descricao)
+            link[cleanKey] = String(rawLink[key] || '').trim();
+        }
+    }
+    const title = link.title || link.nome || link.site || link.nome_do_site || '';
+    const description = link.description || link.descricao || link.detalhes || '';
+    const url = link.url || link.link || link.endereco || '';
+    const icon = link.icon || link.icone || link.emoji || link.image || link.imagem || '';
+    const category = link.category || link.categoria || 'Geral';
+
+    if (!title && !url) return null;
+    return { title, description, url, icon, category };
+}
+
 // Combina os links do CSV com os links salvos no LocalStorage
 function mergeLinks(csvLinks, localLinks) {
     const combined = [...csvLinks];
     
-    // Adiciona links locais que não estejam no CSV (usando URL como chave)
+    // Adiciona links locais que não estejam no CSV (usando URL ou título como chave)
     localLinks.forEach(localItem => {
-        const exists = combined.some(csvItem => csvItem.url && csvItem.url.trim() === localItem.url.trim());
+        const exists = combined.some(csvItem => 
+            (csvItem.url && csvItem.url.trim() === localItem.url.trim()) ||
+            (csvItem.title && csvItem.title.trim() === localItem.title.trim())
+        );
         if (!exists) {
             combined.push(localItem);
         }
