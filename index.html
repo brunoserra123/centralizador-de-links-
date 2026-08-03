@@ -23,9 +23,10 @@
             <h1>Meus Links</h1>
             <p>Seus sites favoritos, sempre à mão.</p>
             <p style="color: var(--text-secondary); margin-top: 5px; font-size: 0.9rem;">Por Bruno Serra</p>
-            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 1.5rem;">
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap;">
                 <button id="add-link-btn" class="add-link-btn" style="margin-top: 0;">+ Adicionar Link</button>
                 <button id="refresh-btn" class="add-link-btn" style="margin-top: 0; background: #10b981;">Atualizar</button>
+                <button id="export-csv-btn" class="add-link-btn" style="margin-top: 0; background: #6366f1;">Baixar CSV</button>
             </div>
         </header>
 
@@ -54,12 +55,16 @@
                     <input type="text" id="link-url" required placeholder="Ex: https://google.com">
                 </div>
                 <div class="form-group">
+                    <label for="link-category">Categoria</label>
+                    <input type="text" id="link-category" placeholder="Ex: Impressão 3D, Ferramentas, ps5...">
+                </div>
+                <div class="form-group">
                     <label>Ícone da Imagem (Opcional)</label>
                     <input type="file" id="link-image" accept="image/*">
                 </div>
                 <div class="form-group">
                     <label for="link-icon">Ou digite um Emoji</label>
-                    <input type="text" id="link-icon" placeholder="Ex: 🔍 (deixe vazio se enviar imagem)">
+                    <input type="text" id="link-icon" placeholder="Ex: 🔍 (deixe vazio para ícone automático)">
                 </div>
                 <div class="modal-actions">
                     <button type="submit" class="submit-btn">Salvar Link</button>

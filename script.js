@@ -1,10 +1,12 @@
 // Estado global para armazenar os links na memória
 let currentLinks = [];
+let localCustomLinks = JSON.parse(localStorage.getItem('custom_links') || '[]');
 
-// Busca os links do arquivo links.csv local
+// Função para buscar links do CSV com prevenção de cache (cache busting)
 async function fetchLinks() {
     try {
-        const response = await fetch('links.csv');
+        const cacheBuster = `?t=${Date.now()}`;
+        const response = await fetch('links.csv' + cacheBuster, { cache: 'no-store' });
         
         if (!response.ok) {
             throw new Error('Falha ao carregar o arquivo links.csv');
@@ -17,14 +19,34 @@ async function fetchLinks() {
             header: true,
             skipEmptyLines: true,
             complete: function(results) {
-                currentLinks = results.data;
+                const csvLinks = results.data;
+                currentLinks = mergeLinks(csvLinks, localCustomLinks);
                 renderLinks();
             }
         });
     } catch (err) {
         console.error("Erro ao buscar links do arquivo links.csv:", err);
-        alert("Aviso: Não foi possível carregar os links do arquivo 'links.csv'. Verifique se você abriu o site com um servidor local ou hospedou corretamente.");
+        // Se houver falha de rede/CORS por abrir direto no navegador (file://)
+        if (localCustomLinks.length > 0) {
+            currentLinks = localCustomLinks;
+        }
+        renderLinks();
     }
+}
+
+// Combina os links do CSV com os links salvos no LocalStorage
+function mergeLinks(csvLinks, localLinks) {
+    const combined = [...csvLinks];
+    
+    // Adiciona links locais que não estejam no CSV (usando URL como chave)
+    localLinks.forEach(localItem => {
+        const exists = combined.some(csvItem => csvItem.url && csvItem.url.trim() === localItem.url.trim());
+        if (!exists) {
+            combined.push(localItem);
+        }
+    });
+    
+    return combined;
 }
 
 // Retorna os links atuais da memória
@@ -44,14 +66,14 @@ function createLinkCard(link, index) {
     a.rel = "noopener noreferrer"; // Segurança
     a.className = "link-card";
 
-    let iconContent = link.icon;
+    let iconContent = link.icon ? link.icon.trim() : "";
     
-    // Se o ícone for um link de imagem ou arquivo (ex: .webp, .png, .jpg)
-    if (link.icon && /\.(webp|png|jpg|jpeg|gif|svg)(\?.*)?$/i.test(link.icon.trim())) {
-        iconContent = `<img src="${link.icon.trim()}" alt="Ícone" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;">`;
+    // Se o ícone for um Data URL (imagem enviada localmente) ou link de imagem
+    if (iconContent.startsWith('data:image/') || /\.(webp|png|jpg|jpeg|gif|svg)(\?.*)?$/i.test(iconContent)) {
+        iconContent = `<img src="${iconContent}" alt="Ícone" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;">`;
     } else if (link.image) {
         iconContent = `<img src="${link.image}" alt="Ícone" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;">`;
-    } else if (!link.icon || link.icon.trim() === '') {
+    } else if (!iconContent) {
         // Busca automaticamente o ícone do site usando a API do Google
         try {
             const urlObj = new URL(finalUrl);
@@ -65,12 +87,20 @@ function createLinkCard(link, index) {
     a.innerHTML = `
         <div class="card-icon">${iconContent}</div>
         <div class="card-content">
-            <h2 class="card-title">${link.title}</h2>
-            <p class="card-description">${link.description}</p>
+            <h2 class="card-title">${escapeHTML(link.title || 'Sem título')}</h2>
+            <p class="card-description">${escapeHTML(link.description || '')}</p>
         </div>
     `;
 
     return a;
+}
+
+function escapeHTML(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
 }
 
 function renderLinks() {
@@ -79,14 +109,14 @@ function renderLinks() {
     const linksData = getLinks();
 
     if (linksData.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: white; width: 100%;">Nenhum link encontrado. Adicione no arquivo links.csv!</p>';
+        container.innerHTML = '<p style="text-align: center; color: white; width: 100%;">Nenhum link encontrado. Adicione pelo botão acima!</p>';
         return;
     }
 
     // Agrupar por categoria
     const categories = {};
     linksData.forEach(link => {
-        const cat = link.category ? link.category.trim() : 'Geral';
+        const cat = (link.category && link.category.trim()) ? link.category.trim() : 'Geral';
         if (!categories[cat]) {
             categories[cat] = [];
         }
@@ -116,21 +146,76 @@ function renderLinks() {
     }
 }
 
-// Configuração do Botão
+// Configurações da Modal e Interface
 function setupUI() {
     const addBtn = document.getElementById('add-link-btn');
     const refreshBtn = document.getElementById('refresh-btn');
+    const exportBtn = document.getElementById('export-csv-btn');
+    const modalOverlay = document.getElementById('modal-overlay');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const addLinkForm = document.getElementById('add-link-form');
 
-    // Como é estático e lido do Excel/Planilha, o botão avisa o usuário
-    if (addBtn) {
+    // Abrir Modal
+    if (addBtn && modalOverlay) {
         addBtn.addEventListener('click', () => {
-            alert("Para adicionar um novo link, abra o arquivo 'links.csv' no Excel, Google Sheets ou Bloco de Notas, adicione uma nova linha e salve!");
+            modalOverlay.classList.add('active');
         });
-        
-        // Ou podemos mudar o texto do botão
-        addBtn.innerText = "Como Adicionar?";
     }
 
+    // Fechar Modal no botão 'X'
+    if (closeModalBtn && modalOverlay) {
+        closeModalBtn.addEventListener('click', () => {
+            modalOverlay.classList.remove('active');
+        });
+    }
+
+    // Fechar Modal ao clicar fora
+    if (modalOverlay) {
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                modalOverlay.classList.remove('active');
+            }
+        });
+    }
+
+    // Salvar Novo Link pelo Formulário da Modal
+    if (addLinkForm) {
+        addLinkForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const title = document.getElementById('link-title').value.trim();
+            const description = document.getElementById('link-desc').value.trim();
+            const url = document.getElementById('link-url').value.trim();
+            const category = document.getElementById('link-category').value.trim() || 'Geral';
+            const iconInput = document.getElementById('link-icon').value.trim();
+            const imageFileInput = document.getElementById('link-image');
+
+            let icon = iconInput;
+
+            // Se enviou arquivo de imagem, converter para Base64
+            if (imageFileInput && imageFileInput.files && imageFileInput.files[0]) {
+                const file = imageFileInput.files[0];
+                icon = await readFileAsBase64(file);
+            }
+
+            const newLink = { title, description, url, category, icon };
+
+            // Salvar no array local e localStorage
+            localCustomLinks.push(newLink);
+            localStorage.setItem('custom_links', JSON.stringify(localCustomLinks));
+
+            // Atualizar estado e tela
+            currentLinks.push(newLink);
+            renderLinks();
+
+            // Limpar formulário e fechar modal
+            addLinkForm.reset();
+            modalOverlay.classList.remove('active');
+            alert(`✅ Link "${title}" adicionado com sucesso!`);
+        });
+    }
+
+    // Botão Atualizar (busca CSV atualizado sem cache)
     if (refreshBtn) {
         refreshBtn.addEventListener('click', () => {
             refreshBtn.innerText = "Atualizando...";
@@ -141,9 +226,47 @@ function setupUI() {
             });
         });
     }
+
+    // Botão Baixar CSV (Gera o arquivo links.csv com todos os links)
+    if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+            exportCSV();
+        });
+    }
 }
 
-// Carrega os dados na inicialização
+// Converter arquivo para Base64
+function readFileAsBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+    });
+}
+
+// Exportar links para arquivo CSV
+function exportCSV() {
+    if (currentLinks.length === 0) {
+        alert("Nenhum link para exportar.");
+        return;
+    }
+
+    const csvData = Papa.unparse(currentLinks, {
+        columns: ["title", "description", "url", "icon", "category"]
+    });
+
+    const blob = new Blob(["\ufeff" + csvData], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'links.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Inicializar aplicação
 document.addEventListener('DOMContentLoaded', () => {
     fetchLinks();
     setupUI();

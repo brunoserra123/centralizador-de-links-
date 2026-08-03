@@ -7,8 +7,14 @@ echo.
 echo Enviando seus novos links para a nuvem...
 echo.
 
+where git >nul 2>nul
+if %errorlevel% neq 0 (
+    if exist "C:\Program Files\Git\cmd\git.exe" set "PATH=%PATH%;C:\Program Files\Git\cmd"
+    if exist "%LocalAppData%\Programs\Git\cmd\git.exe" set "PATH=%PATH%;%LocalAppData%\Programs\Git\cmd"
+)
+
 git add .
-git commit -m "Adicionado novo link"
+git commit -m "Atualizacao de links"
 git push
 
 echo.
