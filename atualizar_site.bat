@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 color 0A
 echo ====================================
 echo   ROBOZINHO DE LINKS 🤖
@@ -14,13 +15,23 @@ if %errorlevel% neq 0 (
 )
 
 git add .
-git commit -m "Atualizacao de links"
-git push
+git commit -m "Atualizacao de links" >nul 2>&1
+git pull origin main --rebase
+git push origin main
 
-echo.
-echo ====================================
-echo 🎉 FEITO! Tudo atualizado!
-echo O seu site estara com os novos links no ar em 1 a 2 minutos.
-echo ====================================
+if %errorlevel% equ 0 (
+    echo.
+    echo ====================================
+    echo 🎉 FEITO! Tudo enviado com sucesso!
+    echo O seu site estara com os novos links no ar em 1 a 2 minutos.
+    echo ====================================
+) else (
+    echo.
+    echo ====================================
+    echo ❌ ERRO AO ENVIAR PARA O GITHUB!
+    echo Tente executar o arquivo novamente.
+    echo ====================================
+)
+
 echo.
 pause
