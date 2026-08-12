@@ -1,0 +1,2 @@
+# Ignorar arquivo de token local para não ser revogado pelo GitHub
+config.local.js

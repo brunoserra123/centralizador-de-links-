@@ -368,7 +368,11 @@ async function syncWithRobot() {
         }
 
         // 2. Modo API do GitHub (Navegador Web / Celular)
-        let token = (window.ROBOT_CONFIG && typeof window.ROBOT_CONFIG.getToken === 'function') ? window.ROBOT_CONFIG.getToken() : localStorage.getItem('gh_token');
+        let token = (window.ROBOT_CONFIG && window.ROBOT_CONFIG.LOCAL_TOKEN) || (window.ROBOT_CONFIG && typeof window.ROBOT_CONFIG.getToken === 'function' ? window.ROBOT_CONFIG.getToken() : null) || localStorage.getItem('gh_token');
+
+        if (window.ROBOT_CONFIG && window.ROBOT_CONFIG.LOCAL_TOKEN) {
+            localStorage.setItem('gh_token', window.ROBOT_CONFIG.LOCAL_TOKEN);
+        }
 
         if (!token) {
             openRobotModal();
