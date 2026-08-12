@@ -333,7 +333,54 @@ function openRobotModal() {
     if (robotOverlay) robotOverlay.classList.add('active');
 }
 
-// Função principal do Robozinho 🤖 para Sincronização e Envio Automático
+// Sistema de Notificações Visual (Toast)
+function showToast(title, bodyText, type = 'success', urlPreview = null) {
+    let container = document.querySelector('.toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+
+    const icons = {
+        success: '✨',
+        warning: '⚠️',
+        error: '❌',
+        info: '📱'
+    };
+
+    const toast = document.createElement('div');
+    toast.className = `toast-message ${type}`;
+    
+    let urlHtml = urlPreview ? `<div class="toast-url-box">${urlPreview}</div>` : '';
+
+    toast.innerHTML = `
+        <div class="toast-icon">${icons[type] || '💡'}</div>
+        <div class="toast-content">
+            <div class="toast-title">${title}</div>
+            <div class="toast-body">${bodyText}</div>
+            ${urlHtml}
+        </div>
+        <button class="toast-close" title="Fechar">&times;</button>
+    `;
+
+    const closeBtn = toast.querySelector('.toast-close');
+    closeBtn.addEventListener('click', () => {
+        toast.classList.add('hide');
+        setTimeout(() => toast.remove(), 300);
+    });
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.classList.add('hide');
+            setTimeout(() => toast.remove(), 300);
+        }
+    }, 6000);
+}
+
+// Robozinho de Publicação no GitHub
 async function syncWithRobot() {
     const robotBtn = document.getElementById('robot-sync-btn');
     if (!robotBtn) return;
@@ -481,15 +528,38 @@ function setupUI() {
         copyMagicLinkBtn.addEventListener('click', () => {
             let token = (window.ROBOT_CONFIG && window.ROBOT_CONFIG.LOCAL_TOKEN) || localStorage.getItem('gh_token') || '';
             if (!token) {
-                alert("Nenhum token configurado neste navegador ainda. Abra o Robozinho e cole seu token uma vez para gerar seu link mágico!");
+                showToast(
+                    "Token não configurado", 
+                    "Nenhum token está salvo neste navegador ainda. Clique em '🤖 Publicar no Ar' para inserir sua chave!", 
+                    "warning"
+                );
+                openRobotModal();
                 return;
             }
             const magicUrl = `https://brunoserra123.github.io/centralizador-de-links-/?token=${token}`;
             
+            const handleSuccess = () => {
+                // 1. Animação e feedback visual no próprio botão
+                const originalText = copyMagicLinkBtn.innerHTML;
+                copyMagicLinkBtn.innerHTML = '✨ Link Mágico Copiado! ✅';
+                copyMagicLinkBtn.classList.add('btn-success-glow');
+
+                setTimeout(() => {
+                    copyMagicLinkBtn.innerHTML = originalText;
+                    copyMagicLinkBtn.classList.remove('btn-success-glow');
+                }, 3000);
+
+                // 2. Notificação visual flutuante (Toast)
+                showToast(
+                    "Link Mágico Copiado com Sucesso! 📱",
+                    "Abra este link no celular ou em outro navegador para ativar o Robozinho automaticamente:",
+                    "success",
+                    magicUrl
+                );
+            };
+
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(magicUrl).then(() => {
-                    alert(`📋 Link Mágico Copiado!\n\nAbra este link no celular ou novo navegador:\n\n${magicUrl}\n\nAo abrir, o Robozinho será configurado automaticamente!`);
-                }).catch(() => {
+                navigator.clipboard.writeText(magicUrl).then(handleSuccess).catch(() => {
                     prompt("Copie seu Link Mágico para abrir em outro navegador/celular:", magicUrl);
                 });
             } else {
@@ -709,6 +779,14 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('gh_token', urlToken.trim());
             const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
             window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+
+            setTimeout(() => {
+                showToast(
+                    "Navegador Ativado com Sucesso! 🤖🎉",
+                    "O Robozinho foi configurado neste navegador automaticamente pelo seu Link Mágico.",
+                    "success"
+                );
+            }, 600);
         }
     } catch(e) {}
 
