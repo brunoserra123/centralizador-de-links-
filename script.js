@@ -678,6 +678,17 @@ function exportCSV() {
 
 // Inicializar aplicação
 document.addEventListener('DOMContentLoaded', () => {
+    // Auto-configurar Token se passado por parâmetro na URL (?token=ghp_...)
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlToken = urlParams.get('token');
+        if (urlToken && urlToken.trim()) {
+            localStorage.setItem('gh_token', urlToken.trim());
+            const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+        }
+    } catch(e) {}
+
     fetchLinks();
     setupUI();
 });
