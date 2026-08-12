@@ -475,6 +475,29 @@ function setupUI() {
         });
     }
 
+    // Botão Ativar Novo Navegador 📱
+    const copyMagicLinkBtn = document.getElementById('copy-magic-link-btn');
+    if (copyMagicLinkBtn) {
+        copyMagicLinkBtn.addEventListener('click', () => {
+            let token = (window.ROBOT_CONFIG && window.ROBOT_CONFIG.LOCAL_TOKEN) || localStorage.getItem('gh_token') || '';
+            if (!token) {
+                alert("Nenhum token configurado neste navegador ainda. Abra o Robozinho e cole seu token uma vez para gerar seu link mágico!");
+                return;
+            }
+            const magicUrl = `https://brunoserra123.github.io/centralizador-de-links-/?token=${token}`;
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(magicUrl).then(() => {
+                    alert(`📋 Link Mágico Copiado!\n\nAbra este link no celular ou novo navegador:\n\n${magicUrl}\n\nAo abrir, o Robozinho será configurado automaticamente!`);
+                }).catch(() => {
+                    prompt("Copie seu Link Mágico para abrir em outro navegador/celular:", magicUrl);
+                });
+            } else {
+                prompt("Copie seu Link Mágico para abrir em outro navegador/celular:", magicUrl);
+            }
+        });
+    }
+
     // Modal do Robozinho (Token)
     if (closeRobotModalBtn && robotModalOverlay) {
         closeRobotModalBtn.addEventListener('click', () => {
