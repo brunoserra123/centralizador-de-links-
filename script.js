@@ -324,9 +324,129 @@ function openModalForEdit(link, index) {
     if (modalOverlay) modalOverlay.classList.add('active');
 }
 
+function openRobotModal() {
+    const robotOverlay = document.getElementById('robot-modal-overlay');
+    const tokenInput = document.getElementById('github-token');
+    if (tokenInput) {
+        tokenInput.value = localStorage.getItem('gh_token') || '';
+    }
+    if (robotOverlay) robotOverlay.classList.add('active');
+}
+
+// Função principal do Robozinho 🤖 para Sincronização e Envio Automático
+async function syncWithRobot() {
+    const robotBtn = document.getElementById('robot-sync-btn');
+    if (!robotBtn) return;
+
+    const originalText = robotBtn.innerHTML;
+    robotBtn.innerHTML = "🤖 Publicando...";
+    robotBtn.disabled = true;
+
+    try {
+        const csvContent = Papa.unparse(currentLinks, {
+            columns: ["title", "description", "url", "icon", "category"]
+        });
+
+        // 1. Tentar modo HTA/ActiveX se executando localmente com suporte ActiveX
+        if (typeof window.ActiveXObject !== 'undefined' || typeof WScript !== 'undefined') {
+            try {
+                const fso = new ActiveXObject("Scripting.FileSystemObject");
+                const file = fso.CreateTextFile("links.csv", true, true);
+                file.Write("\ufeff" + csvContent);
+                file.Close();
+
+                const shell = new ActiveXObject("WScript.Shell");
+                shell.Run("cmd.exe /c atualizar_site.bat", 0, false);
+
+                alert("🤖 Robozinho executou a atualização local com sucesso!\nSeu site no GitHub estará atualizado em 1 a 2 minutos.");
+                robotBtn.innerHTML = originalText;
+                robotBtn.disabled = false;
+                return;
+            } catch (errLocal) {
+                console.log("Modo ActiveX não disponível, prosseguindo via API:", errLocal);
+            }
+        }
+
+        // 2. Modo API do GitHub (Navegador Web / Celular)
+        let token = localStorage.getItem('gh_token');
+
+        if (!token) {
+            openRobotModal();
+            robotBtn.innerHTML = originalText;
+            robotBtn.disabled = false;
+            return;
+        }
+
+        await publishToGitHubAPI(token, csvContent);
+
+        alert("🎉 🤖 Robozinho enviou seus novos links direto para o GitHub!\nO site estará com tudo atualizado no ar em 1 a 2 minutos.");
+    } catch (err) {
+        console.error("Erro na publicação do Robozinho:", err);
+        alert("⚠️ Erro ao publicar pelo Robozinho: " + err.message + "\n\nVerifique se o seu Token do GitHub está correto.");
+        if (err.message.includes('401') || err.message.includes('credentials') || err.message.includes('token') || err.message.includes('403')) {
+            openRobotModal();
+        }
+    } finally {
+        robotBtn.innerHTML = originalText;
+        robotBtn.disabled = false;
+    }
+}
+
+// Envio direto para o GitHub via REST API (Sem precisar baixar CSV)
+async function publishToGitHubAPI(token, csvText) {
+    const owner = "brunoserra123";
+    const repo = "centralizador-de-links-";
+    const path = "links.csv";
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+
+    // 1. Obter SHA do arquivo links.csv atual no repositório
+    const getRes = await fetch(apiUrl, {
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Accept": "application/vnd.github.v3+json"
+        }
+    });
+
+    let sha = "";
+    if (getRes.ok) {
+        const fileData = await getRes.json();
+        sha = fileData.sha;
+    }
+
+    // Codificar CSV em UTF-8 Base64
+    const encoder = new TextEncoder();
+    const dataBytes = encoder.encode("\ufeff" + csvText);
+    let binary = '';
+    for (let i = 0; i < dataBytes.byteLength; i++) {
+        binary += String.fromCharCode(dataBytes[i]);
+    }
+    const base64Content = btoa(binary);
+
+    // 2. Fazer o commit / update no GitHub
+    const putRes = await fetch(apiUrl, {
+        method: "PUT",
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+            "Accept": "application/vnd.github.v3+json"
+        },
+        body: JSON.stringify({
+            message: "🤖 Atualizacao automatica de links pelo Robozinho",
+            content: base64Content,
+            sha: sha || undefined
+        })
+    });
+
+    if (!putRes.ok) {
+        const errorJson = await putRes.json().catch(() => ({}));
+        throw new Error(errorJson.message || `Erro HTTP ${putRes.status}`);
+    }
+}
+
 // Configurações da Modal e Interface
 function setupUI() {
     const addBtn = document.getElementById('add-link-btn');
+    const robotSyncBtn = document.getElementById('robot-sync-btn');
     const refreshBtn = document.getElementById('refresh-btn');
     const exportBtn = document.getElementById('export-csv-btn');
     const modalOverlay = document.getElementById('modal-overlay');
@@ -334,10 +454,50 @@ function setupUI() {
     const addLinkForm = document.getElementById('add-link-form');
     const deleteBtn = document.getElementById('delete-link-btn');
     
+    const robotModalOverlay = document.getElementById('robot-modal-overlay');
+    const closeRobotModalBtn = document.getElementById('close-robot-modal-btn');
+    const saveTokenBtn = document.getElementById('save-token-btn');
+    const tokenInput = document.getElementById('github-token');
+
     const urlInput = document.getElementById('link-url');
     const titleInput = document.getElementById('link-title');
     const descInput = document.getElementById('link-desc');
     const categoryInput = document.getElementById('link-category');
+
+    // Botão do Robozinho 🤖
+    if (robotSyncBtn) {
+        robotSyncBtn.addEventListener('click', () => {
+            syncWithRobot();
+        });
+    }
+
+    // Modal do Robozinho (Token)
+    if (closeRobotModalBtn && robotModalOverlay) {
+        closeRobotModalBtn.addEventListener('click', () => {
+            robotModalOverlay.classList.remove('active');
+        });
+    }
+
+    if (robotModalOverlay) {
+        robotModalOverlay.addEventListener('click', (e) => {
+            if (e.target === robotModalOverlay) {
+                robotModalOverlay.classList.remove('active');
+            }
+        });
+    }
+
+    if (saveTokenBtn && tokenInput) {
+        saveTokenBtn.addEventListener('click', () => {
+            const tokenValue = tokenInput.value.trim();
+            if (!tokenValue) {
+                alert("Por favor, cole um Token válido do GitHub.");
+                return;
+            }
+            localStorage.setItem('gh_token', tokenValue);
+            if (robotModalOverlay) robotModalOverlay.classList.remove('active');
+            syncWithRobot();
+        });
+    }
 
     // Monitorar se o usuário digitou/alterou a categoria manualmente
     if (categoryInput) {

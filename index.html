@@ -25,6 +25,7 @@
             <p style="color: var(--text-secondary); margin-top: 5px; font-size: 0.9rem;">Por Bruno Serra</p>
             <div style="display: flex; gap: 10px; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap;">
                 <button id="add-link-btn" class="add-link-btn" style="margin-top: 0;">+ Adicionar Link</button>
+                <button id="robot-sync-btn" class="add-link-btn" style="margin-top: 0; background: linear-gradient(135deg, #ec4899, #8b5cf6); box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);">🤖 Publicar no Ar</button>
                 <button id="refresh-btn" class="add-link-btn" style="margin-top: 0; background: #10b981;">Atualizar</button>
                 <button id="export-csv-btn" class="add-link-btn" style="margin-top: 0; background: #6366f1;">Baixar CSV</button>
             </div>
@@ -34,6 +35,27 @@
             <!-- Categorias serão inseridas aqui pelo JavaScript -->
         </div>
     </main>
+
+    <!-- Modal do Robozinho 🤖 (Token GitHub) -->
+    <div id="robot-modal-overlay" class="modal-overlay">
+        <div class="modal">
+            <button id="close-robot-modal-btn" class="close-modal-btn">&times;</button>
+            <h2>🤖 Robozinho de Publicação</h2>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.2rem;">
+                O Robozinho publica seus links direto no GitHub sem você precisar baixar ou mover o arquivo <code>links.csv</code> manualmente!
+            </p>
+            <div class="form-group">
+                <label for="github-token">Token de Acesso do GitHub (PAT)</label>
+                <input type="password" id="github-token" placeholder="Cole seu token aqui (ex: ghp_...)">
+                <small style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 4px; display: block;">
+                    É necessário um Token com permissão <code>repo</code> ou <code>contents:write</code>. Ficará salvo no seu navegador.
+                </small>
+            </div>
+            <div class="modal-actions" style="margin-top: 1.5rem;">
+                <button type="button" id="save-token-btn" class="submit-btn" style="background: #10b981;">🚀 Salvar & Publicar Agora</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal para adicionar/editar link -->
     <div id="modal-overlay" class="modal-overlay">
