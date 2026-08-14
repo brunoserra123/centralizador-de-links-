@@ -781,24 +781,67 @@ async function hashPassword(password) {
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+// Verifica se há um token na URL para ser processado depois da senha
+function getPendingUrlToken() {
+    try {
+        let urlToken = null;
+        if (window.location.hash.startsWith('#token=')) {
+            urlToken = window.location.hash.substring(7);
+        } else {
+            const urlParams = new URLSearchParams(window.location.search);
+            urlToken = urlParams.get('token');
+        }
+        return urlToken && urlToken.trim() ? urlToken.trim() : null;
+    } catch(e) {
+        return null;
+    }
+}
+
+// Aplica o token pendente, limpa a URL e mostra o toast
+function processPendingToken(token) {
+    if (!token) return;
+    
+    localStorage.setItem('gh_token', token);
+    const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+
+    setTimeout(() => {
+        showToast(
+            "Navegador Ativado com Sucesso! 🤖🎉",
+            "O Robozinho foi configurado neste navegador automaticamente pelo seu Link Mágico.",
+            "success"
+        );
+    }, 600);
+}
+
 function initLockScreen() {
     const lockScreen = document.getElementById('lock-screen');
     const passwordInput = document.getElementById('site-password');
     const unlockBtn = document.getElementById('unlock-btn');
     const errorMsg = document.getElementById('lock-error');
+    
+    const pendingToken = getPendingUrlToken();
+
+    const onUnlockSuccess = () => {
+        sessionStorage.setItem('site_unlocked', 'true');
+        if (lockScreen) lockScreen.classList.remove('active');
+        if (errorMsg) errorMsg.style.display = 'none';
+        
+        processPendingToken(pendingToken);
+        
+        fetchLinks();
+        setupUI();
+    };
 
     if (!lockScreen) {
         // Se por algum motivo o HTML não tiver a tela, carrega normal
-        fetchLinks();
-        setupUI();
+        onUnlockSuccess();
         return;
     }
 
     // Se já desbloqueou nesta sessão, libera direto
     if (sessionStorage.getItem('site_unlocked') === 'true') {
-        lockScreen.classList.remove('active');
-        fetchLinks();
-        setupUI();
+        onUnlockSuccess();
         return;
     }
 
@@ -810,11 +853,7 @@ function initLockScreen() {
         const hashed = await hashPassword(pass);
         
         if (hashed === SECRET_HASH) {
-            sessionStorage.setItem('site_unlocked', 'true');
-            lockScreen.classList.remove('active');
-            errorMsg.style.display = 'none';
-            fetchLinks();
-            setupUI();
+            onUnlockSuccess();
         } else {
             errorMsg.style.display = 'block';
             passwordInput.value = '';
@@ -834,32 +873,6 @@ function initLockScreen() {
 
 // Inicializar aplicação
 document.addEventListener('DOMContentLoaded', () => {
-    // Auto-configurar Token se passado por parâmetro no hash da URL (#token=ghp_...)
-    try {
-        let urlToken = null;
-        if (window.location.hash.startsWith('#token=')) {
-            urlToken = window.location.hash.substring(7); // Remove o '#token='
-        } else {
-            // Mantém a compatibilidade com links antigos gerados com '?token='
-            const urlParams = new URLSearchParams(window.location.search);
-            urlToken = urlParams.get('token');
-        }
-
-        if (urlToken && urlToken.trim()) {
-            localStorage.setItem('gh_token', urlToken.trim());
-            const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-            window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
-
-            setTimeout(() => {
-                showToast(
-                    "Navegador Ativado com Sucesso! 🤖🎉",
-                    "O Robozinho foi configurado neste navegador automaticamente pelo seu Link Mágico.",
-                    "success"
-                );
-            }, 600);
-        }
-    } catch(e) {}
-
-    // Inicia a verificação da tela de bloqueio
+    // Inicia a verificação da tela de bloqueio (ela vai processar o token do link mágico se houver)
     initLockScreen();
 });
