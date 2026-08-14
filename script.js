@@ -737,47 +737,6 @@ function setupUI() {
         });
     }
 
-    // Inicializa o seletor de layouts/modelos visuais
-    setupLayoutSelector();
-}
-
-// Configuração do Seletor de Modelo de Layout
-function setupLayoutSelector() {
-    const buttons = document.querySelectorAll('.layout-opt-btn');
-    if (buttons.length === 0) return;
-
-    // Carrega o layout salvo ou padrão 'grid'
-    const savedLayout = localStorage.getItem('layout_model') || 'grid';
-    applyLayout(savedLayout);
-
-    buttons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const layout = btn.getAttribute('data-layout');
-            if (layout) {
-                localStorage.setItem('layout_model', layout);
-                applyLayout(layout);
-                showToast("Modelo alterado! 🎨", `O layout foi atualizado para o modo ${btn.innerText.trim()}.`, "success");
-            }
-        });
-    });
-}
-
-function applyLayout(layoutName) {
-    // Remove classes anteriores
-    document.body.classList.remove('layout-grid', 'layout-list', 'layout-retro', 'layout-minimal');
-    
-    // Aplica a nova classe correspondente
-    document.body.classList.add('layout-' + layoutName);
-
-    // Atualiza botões ativos na interface
-    const buttons = document.querySelectorAll('.layout-opt-btn');
-    buttons.forEach(btn => {
-        if (btn.getAttribute('data-layout') === layoutName) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
-        }
-    });
 }
 
 // Converter arquivo para Base64
@@ -915,10 +874,6 @@ function initLockScreen() {
 
 // Inicializar aplicação
 document.addEventListener('DOMContentLoaded', () => {
-    // Aplica o layout salvo imediatamente para evitar piscadas (flickers) na tela de login
-    const savedLayout = localStorage.getItem('layout_model') || 'grid';
-    document.body.classList.add('layout-' + savedLayout);
-
     // Inicia a verificação da tela de bloqueio (ela vai processar o token do link mágico se houver)
     initLockScreen();
 });
