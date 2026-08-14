@@ -536,7 +536,7 @@ function setupUI() {
                 openRobotModal();
                 return;
             }
-            const magicUrl = `https://brunoserra123.github.io/centralizador-de-links-/?token=${token}`;
+            const magicUrl = `https://brunoserra123.github.io/centralizador-de-links-/#token=${token}`;
             
             const handleSuccess = () => {
                 // 1. Animação e feedback visual no próprio botão
@@ -771,10 +771,17 @@ function exportCSV() {
 
 // Inicializar aplicação
 document.addEventListener('DOMContentLoaded', () => {
-    // Auto-configurar Token se passado por parâmetro na URL (?token=ghp_...)
+    // Auto-configurar Token se passado por parâmetro no hash da URL (#token=ghp_...)
     try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const urlToken = urlParams.get('token');
+        let urlToken = null;
+        if (window.location.hash.startsWith('#token=')) {
+            urlToken = window.location.hash.substring(7); // Remove o '#token='
+        } else {
+            // Mantém a compatibilidade com links antigos gerados com '?token='
+            const urlParams = new URLSearchParams(window.location.search);
+            urlToken = urlParams.get('token');
+        }
+
         if (urlToken && urlToken.trim()) {
             localStorage.setItem('gh_token', urlToken.trim());
             const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
