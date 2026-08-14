@@ -585,11 +585,22 @@ function setupUI() {
 
     if (saveTokenBtn && tokenInput) {
         saveTokenBtn.addEventListener('click', () => {
-            const tokenValue = tokenInput.value.trim();
+            let tokenValue = tokenInput.value.trim();
             if (!tokenValue) {
                 alert("Por favor, cole um Token válido do GitHub.");
                 return;
             }
+            
+            // Tratamento inteligente: Se colou a URL do Link Mágico inteira por engano
+            if (tokenValue.includes('token=')) {
+                try {
+                    const parts = tokenValue.split('token=');
+                    tokenValue = parts[parts.length - 1].split('&')[0].trim();
+                } catch (e) {
+                    console.error("Erro ao extrair token da URL colada:", e);
+                }
+            }
+            
             localStorage.setItem('gh_token', tokenValue);
             if (robotModalOverlay) robotModalOverlay.classList.remove('active');
             syncWithRobot();
@@ -802,7 +813,18 @@ function getPendingUrlToken() {
 function processPendingToken(token) {
     if (!token) return;
     
-    localStorage.setItem('gh_token', token);
+    let cleanToken = token.trim();
+    // Tratamento inteligente: Se o token extraído contiver a URL por duplicação
+    if (cleanToken.includes('token=')) {
+        try {
+            const parts = cleanToken.split('token=');
+            cleanToken = parts[parts.length - 1].split('&')[0].trim();
+        } catch (e) {
+            console.error("Erro ao limpar token da URL no processPendingToken:", e);
+        }
+    }
+    
+    localStorage.setItem('gh_token', cleanToken);
     const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
     window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
 
