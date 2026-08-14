@@ -3,6 +3,8 @@ let currentLinks = [];
 let localCustomLinks = JSON.parse(localStorage.getItem('custom_links') || '[]');
 let editingIndex = null;
 let categoryUserEdited = false; // Rastreia se o usuário alterou a categoria manualmente
+let activeCategory = 'Todos';
+let searchQuery = '';
 
 // Função para buscar links do CSV com prevenção de cache (cache busting)
 async function fetchLinks() {
@@ -230,57 +232,63 @@ function escapeHTML(str) {
 }
 
 function renderLinks() {
-    const container = document.getElementById('categories-container');
-    container.innerHTML = ''; // Limpa a grade
+    const container = document.getElementById('links-container');
+    const tabsContainer = document.getElementById('tabs-container');
+    if (!container || !tabsContainer) return;
+
     const linksData = getLinks();
 
-    if (linksData.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: white; width: 100%;">Nenhum link encontrado. Adicione pelo botão acima!</p>';
+    // 1. Coletar categorias únicas
+    const categories = ['Todos'];
+    linksData.forEach(link => {
+        const cat = (link.category && link.category.trim()) ? link.category.trim() : 'Geral';
+        if (!categories.includes(cat)) {
+            categories.push(cat);
+        }
+    });
+
+    // 2. Renderizar abas de categorias
+    tabsContainer.innerHTML = '';
+    categories.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'tab-btn';
+        if (cat === activeCategory) btn.classList.add('active');
+        btn.innerText = cat;
+        btn.addEventListener('click', () => {
+            activeCategory = cat;
+            renderLinks();
+        });
+        tabsContainer.appendChild(btn);
+    });
+
+    // 3. Filtrar os links com base na aba ativa e na busca
+    const cleanSearch = cleanString(searchQuery);
+    const filteredLinks = linksData.filter(link => {
+        // Filtro por Categoria
+        const linkCat = (link.category && link.category.trim()) ? link.category.trim() : 'Geral';
+        const matchesCategory = (activeCategory === 'Todos' || linkCat === activeCategory);
+
+        // Filtro por Busca
+        const matchesSearch = !cleanSearch || 
+            cleanString(link.title).includes(cleanSearch) || 
+            cleanString(link.description).includes(cleanSearch) || 
+            cleanString(link.url).includes(cleanSearch);
+
+        return matchesCategory && matchesSearch;
+    });
+
+    // 4. Renderizar os cards de links
+    container.innerHTML = '';
+    if (filteredLinks.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); grid-column: 1 / -1; padding: 2rem;">Nenhum link encontrado.</p>';
         return;
     }
 
-    // Agrupar por categoria (com normalização visual para agrupar categorias parecidas)
-    const categories = {};
-    const categoryNameMap = {}; // Guarda o nome original formatado da categoria
-
-    linksData.forEach(link => {
-        const rawCat = (link.category && link.category.trim()) ? link.category.trim() : 'Geral';
-        const cleanKey = cleanString(rawCat);
-
-        if (!categoryNameMap[cleanKey]) {
-            categoryNameMap[cleanKey] = rawCat;
-        }
-
-        const canonicalName = categoryNameMap[cleanKey];
-        if (!categories[canonicalName]) {
-            categories[canonicalName] = [];
-        }
-        categories[canonicalName].push(link);
+    filteredLinks.forEach(link => {
+        const globalIndex = currentLinks.indexOf(link);
+        const card = createLinkCard(link, globalIndex !== -1 ? globalIndex : 0);
+        container.appendChild(card);
     });
-
-    // Renderizar cada categoria
-    for (const [catName, catLinks] of Object.entries(categories)) {
-        const section = document.createElement('div');
-        section.className = 'category-section';
-        
-        const title = document.createElement('h2');
-        title.className = 'category-title';
-        title.innerText = catName;
-        section.appendChild(title);
-        
-        const grid = document.createElement('div');
-        grid.className = 'links-grid';
-        
-        catLinks.forEach((link) => {
-            // Encontra o índice global correspondente na lista currentLinks
-            const globalIndex = currentLinks.indexOf(link);
-            const card = createLinkCard(link, globalIndex !== -1 ? globalIndex : 0);
-            grid.appendChild(card);
-        });
-        
-        section.appendChild(grid);
-        container.appendChild(section);
-    }
 
     updateCategoryDatalist();
 }
@@ -527,6 +535,15 @@ function setupUI() {
     const titleInput = document.getElementById('link-title');
     const descInput = document.getElementById('link-desc');
     const categoryInput = document.getElementById('link-category');
+
+    // Escutador da barra de busca em tempo real
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            renderLinks();
+        });
+    }
 
     // Botão do Robozinho 🤖
     if (robotSyncBtn) {

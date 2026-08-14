@@ -44,9 +44,23 @@
                 <button id="export-csv-btn" class="add-link-btn" style="margin-top: 0; background: #6366f1;">Baixar CSV</button>
             </div>
         </header>
+        <!-- Barra de busca e Filtros por Abas -->
+        <div class="search-section">
+            <div class="search-input-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search-input" placeholder="Pesquisar site, descrição ou link...">
+            </div>
+        </div>
 
-        <div id="categories-container">
-            <!-- Categorias serão inseridas aqui pelo JavaScript -->
+        <div class="tabs-scroll-wrapper">
+            <div class="tabs-container" id="tabs-container">
+                <!-- Abas serão geradas dinamicamente pelo JavaScript (ex: Todos, Impressão 3D, etc.) -->
+            </div>
+        </div>
+
+        <!-- Contêiner de Links do Dashboard -->
+        <div class="dashboard-links-container" id="links-container">
+            <!-- Cards de links serão inseridos dinamicamente aqui -->
         </div>
     </main>
 
