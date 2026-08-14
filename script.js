@@ -433,8 +433,21 @@ async function syncWithRobot() {
         alert("🎉 🤖 Robozinho enviou seus novos links direto para o GitHub!\nO site estará com tudo atualizado no ar em 1 a 2 minutos.");
     } catch (err) {
         console.error("Erro na publicação do Robozinho:", err);
-        alert("⚠️ Erro ao publicar pelo Robozinho: " + err.message + "\n\nVerifique se o seu Token do GitHub está correto.");
-        if (err.message.includes('401') || err.message.includes('credentials') || err.message.includes('token') || err.message.includes('403')) {
+        
+        let errorMsg = err.message || "";
+        // Traduz termos comuns do inglês para o português
+        if (errorMsg.includes("Bad credentials") || errorMsg.includes("401")) {
+            errorMsg = "Token inválido (Credenciais incorretas)";
+        } else if (errorMsg.includes("Not Found") || errorMsg.includes("404")) {
+            errorMsg = "Repositório ou arquivo não encontrado no GitHub";
+        } else if (errorMsg.includes("Forbidden") || errorMsg.includes("403")) {
+            errorMsg = "Acesso negado (verifique se o token tem a permissão 'repo' marcada)";
+        }
+
+        alert("⚠️ Erro ao publicar pelo Robozinho: " + errorMsg + "\n\nVerifique se o seu Token do GitHub está correto.");
+        
+        const cleanMsg = String(err.message || "").toLowerCase();
+        if (cleanMsg.includes('401') || cleanMsg.includes('credentials') || cleanMsg.includes('token') || cleanMsg.includes('403')) {
             openRobotModal();
         }
     } finally {
