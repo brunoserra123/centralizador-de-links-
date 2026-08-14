@@ -604,3 +604,316 @@ header p {
     transform: translateY(0);
 }
 
+/* ==========================================================================
+   SELETOR DE MODELOS DE LAYOUT (TEMAS)
+   ========================================================================== */
+
+.layout-selector-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0.4rem 0.6rem;
+    border-radius: 30px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 50;
+    position: relative;
+}
+
+.selector-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-left: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.layout-options {
+    display: flex;
+    gap: 0.35rem;
+}
+
+.layout-opt-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 0.4rem 0.9rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: 'Inter', sans-serif;
+}
+
+.layout-opt-btn:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.layout-opt-btn.active {
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    font-weight: 600;
+}
+
+/* ==================== LAYOUT 2: LISTA GLASSMORPHISM ==================== */
+body.layout-list .container {
+    max-width: 680px;
+}
+
+body.layout-list .links-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+body.layout-list .link-card {
+    flex-direction: row;
+    align-items: center;
+    padding: 1.1rem 1.5rem;
+    gap: 1.2rem;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+body.layout-list .link-card .card-icon {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+body.layout-list .link-card .card-content {
+    flex: 1;
+    gap: 0.2rem;
+}
+
+body.layout-list .link-card:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* ==================== LAYOUT 3: CYBER RETRO (NEO-BRUTALIST) ==================== */
+body.layout-retro {
+    --bg-dark: #120e2e;
+    --card-bg: #1e154a;
+    --card-border: #000000;
+    --text-primary: #ffffff;
+    --text-secondary: #00f0ff;
+    --accent-1: #ff007f;
+    --accent-2: #00f0ff;
+    background-image: linear-gradient(rgba(18, 14, 46, 0.95), rgba(18, 14, 46, 0.95)), 
+                      repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 2px);
+}
+
+body.layout-retro .glow-orb {
+    filter: blur(80px);
+    opacity: 0.25;
+}
+
+body.layout-retro .layout-selector-container {
+    background: #1e154a;
+    border: 2px solid #000000;
+    border-radius: 0;
+    box-shadow: 3px 3px 0px #000000;
+}
+
+body.layout-retro .layout-opt-btn {
+    border-radius: 0;
+    font-weight: bold;
+}
+
+body.layout-retro .layout-opt-btn.active {
+    background: #ff007f;
+    color: #000000;
+    font-weight: bold;
+    box-shadow: none;
+    border: 1px solid #000000;
+}
+
+body.layout-retro .add-link-btn,
+body.layout-retro .submit-btn {
+    background: #ff007f !important;
+    color: #000000 !important;
+    border: 3px solid #000000 !important;
+    border-radius: 0 !important;
+    box-shadow: 4px 4px 0px #000000 !important;
+    font-weight: 800 !important;
+    text-transform: uppercase;
+}
+
+body.layout-retro .add-link-btn:hover,
+body.layout-retro .submit-btn:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px #00f0ff !important;
+}
+
+body.layout-retro .link-card {
+    background: #1e154a;
+    border: 3px solid #000000;
+    border-radius: 0;
+    box-shadow: 5px 5px 0px #000000;
+    transition: all 0.15s ease-in-out;
+}
+
+body.layout-retro .link-card::before {
+    display: none;
+}
+
+body.layout-retro .link-card:hover {
+    transform: translate(-4px, -4px);
+    box-shadow: 9px 9px 0px #ff007f;
+    border-color: #000000;
+}
+
+body.layout-retro .card-icon {
+    border-radius: 0;
+    border: 2px solid #000000;
+    background: #00f0ff;
+    color: #000000;
+    font-weight: bold;
+}
+
+body.layout-retro .card-title {
+    color: #ffffff;
+    font-family: monospace;
+    font-size: 1.3rem;
+    text-shadow: 1px 1px 0px #ff007f;
+}
+
+body.layout-retro .card-description {
+    color: #00f0ff;
+    font-family: monospace;
+    font-size: 0.85rem;
+}
+
+body.layout-retro .category-title {
+    font-family: monospace;
+    font-weight: 800;
+    color: #00f0ff;
+    border-bottom: 3px solid #000000;
+    text-shadow: 2px 2px 0px #ff007f;
+}
+
+body.layout-retro .modal {
+    background: #1e154a;
+    border: 3px solid #000000;
+    border-radius: 0;
+    box-shadow: 8px 8px 0px #000000;
+}
+
+body.layout-retro .form-group input {
+    border: 2px solid #000000;
+    border-radius: 0;
+    background: #120e2e;
+}
+
+/* ==================== LAYOUT 4: CLEAN MINIMALISTA ==================== */
+body.layout-minimal {
+    --bg-dark: #0a0a0a;
+    --card-bg: #121212;
+    --card-border: #262626;
+    --text-primary: #e5e5e5;
+    --text-secondary: #737373;
+    --accent-1: #ffffff;
+    --accent-2: #737373;
+}
+
+body.layout-minimal .background-effects {
+    display: none;
+}
+
+body.layout-minimal header h1 {
+    background: none;
+    -webkit-text-fill-color: var(--text-primary);
+    color: var(--text-primary);
+    animation: none;
+    font-weight: 500;
+    font-size: 3rem;
+    letter-spacing: -0.02em;
+}
+
+body.layout-minimal .layout-selector-container {
+    background: #121212;
+    border: 1px solid #262626;
+    border-radius: 6px;
+}
+
+body.layout-minimal .layout-opt-btn {
+    border-radius: 4px;
+}
+
+body.layout-minimal .layout-opt-btn.active {
+    background: #e5e5e5;
+    color: #0a0a0a;
+    box-shadow: none;
+}
+
+body.layout-minimal .add-link-btn,
+body.layout-minimal .submit-btn {
+    background: #e5e5e5 !important;
+    color: #0a0a0a !important;
+    border-radius: 6px !important;
+    box-shadow: none !important;
+    font-weight: 500;
+}
+
+body.layout-minimal .add-link-btn:hover,
+body.layout-minimal .submit-btn:hover {
+    background: #ffffff !important;
+}
+
+body.layout-minimal .link-card {
+    background: #121212;
+    border: 1px solid #262626;
+    border-radius: 8px;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+body.layout-minimal .link-card::before {
+    display: none;
+}
+
+body.layout-minimal .link-card:hover {
+    border-color: #525252;
+    transform: translateY(-3px);
+    box-shadow: none;
+}
+
+body.layout-minimal .card-icon {
+    border-radius: 6px;
+    background: #1c1c1c;
+}
+
+body.layout-minimal .category-title {
+    font-weight: 500;
+    font-size: 1.4rem;
+    color: #e5e5e5;
+    border-bottom: 1px solid #262626;
+}
+
+body.layout-minimal .modal {
+    background: #121212;
+    border: 1px solid #262626;
+    border-radius: 8px;
+}
+
+body.layout-minimal .form-group input {
+    border: 1px solid #262626;
+    border-radius: 6px;
+    background: #0a0a0a;
+}
+
+

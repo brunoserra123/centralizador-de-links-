@@ -36,6 +36,18 @@
             <h1>Meus Links</h1>
             <p>Seus sites favoritos, sempre à mão.</p>
             <p style="color: var(--text-secondary); margin-top: 5px; font-size: 0.9rem;">Por Bruno Serra</p>
+
+            <!-- Seletor de Modelo de Layout -->
+            <div class="layout-selector-container">
+                <span class="selector-label">Modelo:</span>
+                <div class="layout-options">
+                    <button class="layout-opt-btn active" data-layout="grid" title="Grade Moderna">🌌 Grade</button>
+                    <button class="layout-opt-btn" data-layout="list" title="Lista Glassmorphism">📱 Lista</button>
+                    <button class="layout-opt-btn" data-layout="retro" title="Cyber Retro">🎨 Retro</button>
+                    <button class="layout-opt-btn" data-layout="minimal" title="Clean Minimalista">✨ Clean</button>
+                </div>
+            </div>
+
             <div style="display: flex; gap: 10px; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap;">
                 <button id="add-link-btn" class="add-link-btn" style="margin-top: 0;">+ Adicionar Link</button>
                 <button id="robot-sync-btn" class="add-link-btn" style="margin-top: 0; background: linear-gradient(135deg, #ec4899, #8b5cf6); box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);">🤖 Publicar no Ar</button>
