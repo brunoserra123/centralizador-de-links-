@@ -769,6 +769,69 @@ function exportCSV() {
     document.body.removeChild(link);
 }
 
+// ==================== SEGURANÇA (LOCK SCREEN) ====================
+// Hash gerado da senha definida pelo usuário ("euseiasenha")
+const SECRET_HASH = "bb71b66ac008199e20b54841d10b9b75533e35c41af775653ed74fd35e2144bb";
+
+async function hashPassword(password) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function initLockScreen() {
+    const lockScreen = document.getElementById('lock-screen');
+    const passwordInput = document.getElementById('site-password');
+    const unlockBtn = document.getElementById('unlock-btn');
+    const errorMsg = document.getElementById('lock-error');
+
+    if (!lockScreen) {
+        // Se por algum motivo o HTML não tiver a tela, carrega normal
+        fetchLinks();
+        setupUI();
+        return;
+    }
+
+    // Se já desbloqueou nesta sessão, libera direto
+    if (sessionStorage.getItem('site_unlocked') === 'true') {
+        lockScreen.classList.remove('active');
+        fetchLinks();
+        setupUI();
+        return;
+    }
+
+    const tryUnlock = async () => {
+        const pass = passwordInput.value;
+        if (!pass) return;
+        
+        unlockBtn.innerText = "Verificando...";
+        const hashed = await hashPassword(pass);
+        
+        if (hashed === SECRET_HASH) {
+            sessionStorage.setItem('site_unlocked', 'true');
+            lockScreen.classList.remove('active');
+            errorMsg.style.display = 'none';
+            fetchLinks();
+            setupUI();
+        } else {
+            errorMsg.style.display = 'block';
+            passwordInput.value = '';
+            passwordInput.focus();
+            unlockBtn.innerText = "Desbloquear";
+        }
+    };
+
+    unlockBtn.addEventListener('click', tryUnlock);
+    passwordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') tryUnlock();
+    });
+    
+    // Foca no input logo ao carregar
+    setTimeout(() => passwordInput.focus(), 100);
+}
+
 // Inicializar aplicação
 document.addEventListener('DOMContentLoaded', () => {
     // Auto-configurar Token se passado por parâmetro no hash da URL (#token=ghp_...)
@@ -797,6 +860,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     } catch(e) {}
 
-    fetchLinks();
-    setupUI();
+    // Inicia a verificação da tela de bloqueio
+    initLockScreen();
 });

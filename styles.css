@@ -46,25 +46,30 @@ body {
 }
 
 .orb-1 {
-    width: 400px;
-    height: 400px;
-    background: var(--accent-1);
-    top: -100px;
-    left: -100px;
+    width: 500px;
+    height: 500px;
+    background: linear-gradient(135deg, var(--accent-1), #3b82f6);
+    top: -150px;
+    left: -150px;
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+    animation: floatOrb 15s infinite alternate ease-in-out;
 }
 
 .orb-2 {
-    width: 300px;
-    height: 300px;
-    background: var(--accent-2);
-    bottom: -50px;
-    right: -50px;
+    width: 400px;
+    height: 400px;
+    background: linear-gradient(135deg, var(--accent-2), #ec4899);
+    bottom: -100px;
+    right: -100px;
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    animation: floatOrb 12s infinite alternate-reverse ease-in-out;
     animation-delay: -5s;
 }
 
-@keyframes float {
-    0% { transform: translate(0, 0); }
-    100% { transform: translate(30px, 50px); }
+@keyframes floatOrb {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    50% { transform: translate(50px, 80px) rotate(180deg); }
+    100% { transform: translate(-30px, 40px) rotate(360deg); }
 }
 
 /* Layout Container */
@@ -80,13 +85,21 @@ header {
 }
 
 header h1 {
-    font-size: 3.5rem;
-    font-weight: 700;
+    font-size: 3.8rem;
+    font-weight: 800;
     letter-spacing: -0.05em;
-    background: linear-gradient(to right, #fff, #a8a8a8);
+    background: linear-gradient(270deg, #6366f1, #a855f7, #ec4899, #6366f1);
+    background-size: 300% 300%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: 0.5rem;
+    animation: gradient-shift 6s ease infinite;
+}
+
+@keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 header p {
@@ -113,9 +126,22 @@ header p {
     gap: 1rem;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    transition: all var(--transition-speed) ease;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
     overflow: hidden;
+    animation: fadeUp 0.6s ease-out backwards;
+}
+
+/* Staggered animation effect for cards */
+.link-card:nth-child(1) { animation-delay: 0.1s; }
+.link-card:nth-child(2) { animation-delay: 0.2s; }
+.link-card:nth-child(3) { animation-delay: 0.3s; }
+.link-card:nth-child(4) { animation-delay: 0.4s; }
+.link-card:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes fadeUp {
+    0% { opacity: 0; transform: translateY(30px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
 
 .link-card::before {
@@ -125,15 +151,15 @@ header p {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
+    background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 100%);
     opacity: 0;
-    transition: opacity var(--transition-speed) ease;
+    transition: opacity 0.4s ease;
 }
 
 .link-card:hover {
-    transform: translateY(-5px);
-    border-color: var(--card-hover-border);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(168, 85, 247, 0.4);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(168, 85, 247, 0.2);
 }
 
 .link-card:hover::before {
@@ -536,5 +562,45 @@ header p {
     box-shadow: 0 0 25px rgba(16, 185, 129, 0.7) !important;
     transform: scale(1.03);
     transition: all 0.3s ease;
+}
+
+/* Lock Screen */
+.lock-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-dark);
+    z-index: 99999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+    backdrop-filter: blur(15px);
+}
+
+.lock-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.lock-modal {
+    background: #1a1d24;
+    padding: 2.5rem 2rem;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 380px;
+    border: 1px solid var(--card-border);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    text-align: center;
+    transform: translateY(20px);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.lock-overlay.active .lock-modal {
+    transform: translateY(0);
 }
 
