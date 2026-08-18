@@ -220,44 +220,31 @@ function createLinkCard(link, index) {
     }
 
     a.innerHTML = `
-        <div class="card-header-mobile">
-            <div class="card-icon">${iconContent}</div>
-            <div class="card-content">
-                <h3 class="card-title">${escapeHTML(link.title || 'Sem título')}</h3>
-                <p class="card-description">${escapeHTML(link.description || '')}</p>
-                <div class="card-time-mobile">${timeAgoStr}</div>
+        <div class="list-row-container">
+            <div class="list-icon">${iconContent}</div>
+            <div class="list-main-info">
+                <h3 class="list-title">${escapeHTML(link.title || 'Sem título')}</h3>
+                <span class="list-desc">${escapeHTML(link.description || '')}</span>
             </div>
-            <button class="more-options-btn" type="button">...</button>
-        </div>
-        <div class="card-footer-mobile">
-            <div class="card-tags">${tags}</div>
-            <div class="card-actions-mobile">
-                <button class="action-btn-mobile" type="button">Share</button>
-                <button class="action-btn-mobile edit-card-btn-mobile" type="button">Edit</button>
-                <button class="action-btn-mobile" type="button">More</button>
+            <div class="list-meta">
+                ${tags}
+                <span class="list-time">${timeAgoStr}</span>
+            </div>
+            <div class="list-actions">
+                <button class="list-action-btn edit-btn-list" type="button" title="Editar">✏️</button>
             </div>
         </div>
     `;
 
-    // Botão de editar link (unificado para mobile e desktop)
-    const editBtnMobile = a.querySelector('.edit-card-btn-mobile');
-    if (editBtnMobile) {
-        editBtnMobile.addEventListener('click', (e) => {
+    // Botão de editar link (lista compacta)
+    const editBtnList = a.querySelector('.edit-btn-list');
+    if (editBtnList) {
+        editBtnList.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             openModalForEdit(link, index);
         });
     }
-
-    // Previne cliques nos outros botões mockados de abrir o link
-    const otherBtns = a.querySelectorAll('.more-options-btn, .action-btn-mobile:not(.edit-card-btn-mobile)');
-    otherBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            showToast("Em breve", "Esta funcionalidade (Share/More) será implementada em breve!", "info");
-        });
-    });
 
     return a;
 }
