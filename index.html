@@ -21,13 +21,14 @@
     <!-- Tela de Bloqueio -->
     <div id="lock-screen" class="lock-overlay active">
         <div class="lock-modal">
-            <h2 style="margin-bottom: 0.5rem;">🔒 Acesso Restrito</h2>
-            <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem;">Digite a senha para visualizar e editar seus links.</p>
-            <div class="form-group" style="margin-bottom: 0.5rem;">
+            <h2 class="lock-title">🔒 Acesso Restrito</h2>
+            <p class="lock-desc">Digite a senha para visualizar e editar seus links.</p>
+            <div class="form-group lock-input-group">
                 <input type="password" id="site-password" placeholder="Sua senha..." autocomplete="new-password">
             </div>
-            <button id="unlock-btn" class="submit-btn" style="background: #10b981; margin-top: 0.5rem;">Desbloquear</button>
-            <p id="lock-error" style="color: #ef4444; font-size: 0.9rem; margin-top: 1rem; display: none;">Senha incorreta. Tente novamente.</p>
+            <button id="unlock-btn" class="submit-btn btn-unlock">Desbloquear</button>
+            <button id="unlock-biometrics-btn" class="submit-btn btn-biometrics" style="display: none;">🔑 Usar Biometria</button>
+            <p id="lock-error" class="lock-error" style="display: none;">Senha incorreta. Tente novamente.</p>
         </div>
     </div>
 
@@ -61,7 +62,8 @@
             <div class="action-bar">
                 <button id="add-link-btn" class="action-btn action-add"><span class="icon">+</span> Adicionar Link</button>
                 <button id="robot-sync-btn" class="action-btn action-robot"><span class="icon">🤖</span> Publicar no Ar</button>
-                <button id="copy-magic-link-btn" class="action-btn action-magic"><span class="icon">📱</span> Ativar Novo Navegador</button>
+                <button id="copy-magic-link-btn" class="action-btn action-magic" title="Ativar Novo Navegador"><span class="icon">📱</span> Novo Aparelho</button>
+                <button id="register-biometrics-btn" class="action-btn" title="Configurar Biometria"><span class="icon">🔑</span> Configurar Biometria</button>
                 <button id="export-csv-btn" class="action-btn action-export"><span class="icon">⬇️</span> Baixar CSV</button>
             </div>
         </header>

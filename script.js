@@ -204,42 +204,40 @@ function createLinkCard(link, index) {
 
     const tags = link.category ? `<span class="tag">#${link.category.toLowerCase().replace(/\s+/g, '')}</span>` : '';
     
-    // Calcula o tempo decorrido
-    let timeAgoStr = '';
+    // Calcula a data formatada
+    let dateStr = '';
     if (link.createdAt) {
         const createdDate = new Date(link.createdAt);
-        const diffMs = new Date() - createdDate;
-        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-        if (diffDays === 0) {
-            timeAgoStr = 'hoje';
-        } else if (diffDays === 1) {
-            timeAgoStr = 'ontem';
-        } else {
-            timeAgoStr = `${diffDays} days ago`; // usando o inglês para combinar com o mockup
-        }
+        // Formato: 17/08/2026
+        const day = String(createdDate.getDate()).padStart(2, '0');
+        const month = String(createdDate.getMonth() + 1).padStart(2, '0');
+        const year = createdDate.getFullYear();
+        dateStr = `Adicionado em ${day}/${month}/${year}`;
     }
 
     a.innerHTML = `
-        <div class="list-row-container">
-            <div class="list-icon">${iconContent}</div>
-            <div class="list-main-info">
-                <h3 class="list-title">${escapeHTML(link.title || 'Sem título')}</h3>
-                <span class="list-desc">${escapeHTML(link.description || '')}</span>
+        <div class="card-header-mobile">
+            <div class="card-icon">${iconContent}</div>
+            <div class="card-content">
+                <h3 class="card-title">${escapeHTML(link.title || 'Sem título')}</h3>
+                <p class="card-description">${escapeHTML(link.description || '')}</p>
+                <div class="card-time-mobile">${dateStr}</div>
             </div>
-            <div class="list-meta">
-                ${tags}
-                <span class="list-time">${timeAgoStr}</span>
-            </div>
-            <div class="list-actions">
-                <button class="list-action-btn edit-btn-list" type="button" title="Editar">✏️</button>
+            <button class="more-options-btn" type="button">...</button>
+        </div>
+        <div class="card-footer-mobile">
+            <div class="card-tags">${tags}</div>
+            <div class="card-actions-mobile">
+                <button class="action-btn-mobile edit-card-btn-mobile" type="button">Edit</button>
+                <button class="action-btn-mobile" type="button">Share</button>
             </div>
         </div>
     `;
 
-    // Botão de editar link (lista compacta)
-    const editBtnList = a.querySelector('.edit-btn-list');
-    if (editBtnList) {
-        editBtnList.addEventListener('click', (e) => {
+    // Botão de editar link (unificado)
+    const editBtnMobile = a.querySelector('.edit-card-btn-mobile');
+    if (editBtnMobile) {
+        editBtnMobile.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             openModalForEdit(link, index);
@@ -937,6 +935,23 @@ function initLockScreen() {
         return;
     }
 
+    // Configurar botão de Biometria se existir registro
+    const biometricsBtn = document.getElementById('unlock-biometrics-btn');
+    if (biometricsBtn && localStorage.getItem('webauthn_cred_id')) {
+        biometricsBtn.style.display = 'block';
+        biometricsBtn.addEventListener('click', async () => {
+            biometricsBtn.innerText = "Reconhecendo...";
+            const success = await unlockWithBiometrics();
+            if (success) {
+                onUnlockSuccess();
+            } else {
+                biometricsBtn.innerText = "🔑 Usar Biometria";
+                errorMsg.innerText = "Falha ao reconhecer biometria.";
+                errorMsg.style.display = 'block';
+            }
+        });
+    }
+
     const tryUnlock = async () => {
         const pass = passwordInput.value;
         if (!pass) return;
@@ -965,6 +980,100 @@ function initLockScreen() {
 
 // Inicializar aplicação
 document.addEventListener('DOMContentLoaded', () => {
+    // Registra botão de configuração de biometria (na action bar)
+    const registerBioBtn = document.getElementById('register-biometrics-btn');
+    if (registerBioBtn) {
+        registerBioBtn.addEventListener('click', registerBiometrics);
+    }
+
     // Inicia a verificação da tela de bloqueio (ela vai processar o token do link mágico se houver)
     initLockScreen();
 });
+
+// ==================== WEBAUTHN (BIOMETRIA / PASSKEYS) ====================
+
+function generateRandomBuffer(length) {
+    return window.crypto.getRandomValues(new Uint8Array(length));
+}
+
+async function registerBiometrics() {
+    if (!window.PublicKeyCredential) {
+        alert("Seu navegador ou dispositivo não suporta Biometria/WebAuthn.");
+        return;
+    }
+    
+    try {
+        const userId = generateRandomBuffer(16);
+        const challenge = generateRandomBuffer(32);
+        
+        const publicKeyCredentialCreationOptions = {
+            challenge: challenge,
+            rp: {
+                name: "LinkVault",
+                id: window.location.hostname || "localhost",
+            },
+            user: {
+                id: userId,
+                name: "admin",
+                displayName: "Administrador",
+            },
+            pubKeyCredParams: [{alg: -7, type: "public-key"}], // ES256
+            authenticatorSelection: {
+                userVerification: "required"
+            },
+            timeout: 60000,
+        };
+
+        const credential = await navigator.credentials.create({
+            publicKey: publicKeyCredentialCreationOptions
+        });
+
+        // Salvar o ID da credencial para usar no login
+        const rawId = new Uint8Array(credential.rawId);
+        const base64Id = btoa(String.fromCharCode.apply(null, rawId));
+        localStorage.setItem('webauthn_cred_id', base64Id);
+        
+        alert("✅ Biometria configurada com sucesso!\nNa próxima vez que entrar, você verá a opção de usar sua Digital ou Windows Hello.");
+    } catch (e) {
+        console.error("Erro ao registrar biometria:", e);
+        if (e.name === 'NotAllowedError') {
+            alert("A configuração de biometria foi cancelada.");
+        } else {
+            alert("Falha ao configurar biometria. Certifique-se de estar usando HTTPS.");
+        }
+    }
+}
+
+async function unlockWithBiometrics() {
+    const base64Id = localStorage.getItem('webauthn_cred_id');
+    if (!base64Id) return false;
+
+    try {
+        const challenge = generateRandomBuffer(32);
+        const binaryString = atob(base64Id);
+        const rawId = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+            rawId[i] = binaryString.charCodeAt(i);
+        }
+
+        const publicKeyCredentialRequestOptions = {
+            challenge: challenge,
+            allowCredentials: [{
+                id: rawId,
+                type: 'public-key',
+            }],
+            userVerification: "required",
+            timeout: 60000,
+        };
+
+        await navigator.credentials.get({
+            publicKey: publicKeyCredentialRequestOptions
+        });
+
+        // Se chegou aqui sem erro, a biometria validou localmente!
+        return true;
+    } catch (e) {
+        console.error("Erro ao desbloquear com biometria:", e);
+        return false;
+    }
+}
