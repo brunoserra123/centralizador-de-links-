@@ -107,6 +107,59 @@ header p {
     font-size: 1rem;
 }
 
+/* Desktop Action Bar */
+.action-bar {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    padding: 0.8rem 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: white;
+    border-radius: 14px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    backdrop-filter: blur(10px);
+}
+
+.action-btn .icon {
+    font-size: 1.1rem;
+}
+
+.action-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.action-add {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(6, 182, 212, 0.05));
+    border-color: rgba(6, 182, 212, 0.3);
+}
+.action-add:hover {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.25), rgba(6, 182, 212, 0.1));
+    box-shadow: 0 8px 20px rgba(6, 182, 212, 0.2);
+}
+
+.action-robot {
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(139, 92, 246, 0.15));
+    border-color: rgba(236, 72, 153, 0.3);
+}
+.action-robot:hover {
+    box-shadow: 0 8px 20px rgba(236, 72, 153, 0.25);
+}
+
 /* Search Section */
 .search-section {
     width: 100%;
@@ -216,22 +269,23 @@ header p {
     width: 100%;
 }
 
-/* Link Card */
+/* Link Card (Premium Desktop & Mobile) */
 .link-card {
-    background: var(--card-bg);
+    background: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
     border: 1px solid var(--card-border);
-    border-radius: 18px;
-    padding: 1.1rem;
+    border-radius: 20px;
+    padding: 1.25rem;
     text-decoration: none;
     display: flex;
-    gap: 1.1rem;
-    align-items: center;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     position: relative;
     overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     animation: cardFadeIn 0.35s ease-out forwards;
 }
 
@@ -241,16 +295,17 @@ header p {
 }
 
 .link-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-6px) scale(1.02);
     border-color: var(--card-hover-border);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4), 0 0 18px rgba(6, 182, 212, 0.15);
+    background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 25px rgba(6, 182, 212, 0.2);
 }
 
 .card-icon {
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.05);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -294,38 +349,14 @@ header p {
     text-overflow: ellipsis;
 }
 
-/* Edit Card Button (Appears on Hover) */
-.edit-card-btn {
-    position: absolute;
-    top: 0.65rem;
-    right: 0.65rem;
-    width: 28px;
-    height: 28px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: var(--text-primary);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    opacity: 0;
-    transition: all 0.2s ease;
-    font-size: 0.8rem;
-    z-index: 5;
-    backdrop-filter: blur(5px);
-}
-
-.link-card:hover .edit-card-btn {
-    opacity: 0.8;
-}
-
 .edit-card-btn:hover {
     opacity: 1 !important;
     background: var(--accent-1);
     border-color: var(--accent-1);
     transform: scale(1.08);
 }
+
+/* Esses estilos de edit antigo não são mais usados, mas mantidos se houver resquício */
 
 /* Button & Modal Styles */
 .add-link-btn {
@@ -628,33 +659,233 @@ header p {
     transform: translateY(0);
 }
 
-/* Responsiveness adjustments */
+/* Novos estilos base para o card (Desktop e Mobile) */
+.card-header-mobile {
+    display: flex;
+    gap: 1.1rem;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.more-options-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0 5px;
+    align-self: flex-start;
+    transition: color 0.2s;
+}
+
+.more-options-btn:hover {
+    color: white;
+}
+
+.card-time-mobile {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4);
+    margin-top: 0.3rem;
+}
+
+.card-footer-mobile {
+    display: flex; /* Agora visível em todos os lugares */
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    flex-direction: column;
+    gap: 0.8rem;
+    width: 100%;
+}
+
+.card-tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.tag {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.card-actions-mobile {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.action-btn-mobile {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+    padding: 0.4rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.action-btn-mobile:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+/* Responsiveness adjustments e Mobile Premium UI */
 @media (max-width: 768px) {
-    header h1 {
-        font-size: 2.3rem;
-    }
-    
     .container {
-        padding: 2rem 1rem;
+        padding: 1.5rem 1rem;
     }
     
+    /* Esconder o header original no mobile */
+    .desktop-header {
+        display: none;
+    }
+
+    /* Mostrar e estilizar o novo Header Mobile */
+    .mobile-header {
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .mobile-logo {
+        font-size: 1.5rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: white;
+    }
+    
+    .logo-icon {
+        font-size: 1.8rem;
+    }
+
+    .mobile-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .search-icon-mobile {
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+    }
+
+    .profile-pic {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+    }
+
+    .profile-pic img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .mobile-greeting {
+        display: block !important;
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: white;
+    }
+
+    /* Ocultar a barra de busca original se preferir o estilo mockup */
+    .search-section {
+        display: none; /* Oculta a barra de pesquisa completa para combinar com o mockup que tem só o ícone de lupa em cima */
+    }
+
+    /* Ajustar tabs para ficarem mais próximas ao mockup */
+    .tabs-scroll-wrapper {
+        margin-bottom: 1.5rem;
+        justify-content: flex-start;
+        padding-left: 0.5rem;
+    }
+
+    .tab-btn {
+        padding: 0.4rem 1rem;
+        font-size: 0.8rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: none;
+    }
+
+    .tab-btn.active {
+        background: rgba(6, 182, 212, 0.2);
+        color: var(--accent-1);
+    }
+
+    /* Layout dos Cards no Mobile (já arrumamos no global, mas garantindo aqui) */
     .dashboard-links-container {
         grid-template-columns: 1fr;
-        gap: 1rem;
+        gap: 1.2rem;
+        padding-bottom: 5rem; /* Espaço para o FAB */
     }
     
     .link-card {
-        padding: 1rem;
-        border-radius: 16px;
+        padding: 1.2rem;
+        background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
     }
     
     .card-icon {
-        width: 44px;
-        height: 44px;
-        border-radius: 10px;
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        background: white; /* Fundo branco para os ícones como no mockup */
+        border: none;
     }
     
     .card-title {
-        font-size: 1.05rem;
+        font-size: 1.1rem;
+    }
+
+    .card-description {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Mostrar rodapé do card no mobile (já é global agora) */
+    .card-footer-mobile {
+        display: flex;
+    }
+
+    /* FAB Mobile - Botão Flutuante Add New Link */
+    .fab-mobile {
+        display: flex !important;
+        position: fixed;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 0.8rem 1.5rem;
+        border-radius: 30px;
+        color: white;
+        font-size: 1rem;
+        font-weight: 500;
+        align-items: center;
+        gap: 0.5rem;
+        z-index: 100;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        cursor: pointer;
+    }
+
+    .fab-icon {
+        font-size: 1.2rem;
+        font-weight: 300;
     }
 }

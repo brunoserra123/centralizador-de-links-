@@ -55,9 +55,10 @@ function normalizeLink(rawLink) {
     const url = link.url || link.link || link.endereco || '';
     const icon = link.icon || link.icone || link.emoji || link.image || link.imagem || '';
     const category = link.category || link.categoria || 'Geral';
+    const createdAt = link.createdat || link.criado_em || link.data || '';
 
     if (!title && !url) return null;
-    return { title, description, url, icon, category };
+    return { title, description, url, icon, category, createdAt };
 }
 
 // Combina os links do CSV com os links salvos no LocalStorage
@@ -201,24 +202,62 @@ function createLinkCard(link, index) {
         }
     }
 
+    const tags = link.category ? `<span class="tag">#${link.category.toLowerCase().replace(/\s+/g, '')}</span>` : '';
+    
+    // Calcula o tempo decorrido
+    let timeAgoStr = '';
+    if (link.createdAt) {
+        const createdDate = new Date(link.createdAt);
+        const diffMs = new Date() - createdDate;
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        if (diffDays === 0) {
+            timeAgoStr = 'hoje';
+        } else if (diffDays === 1) {
+            timeAgoStr = 'ontem';
+        } else {
+            timeAgoStr = `${diffDays} days ago`; // usando o inglês para combinar com o mockup
+        }
+    }
+
     a.innerHTML = `
-        <button class="edit-card-btn" type="button" title="Editar Link">✏️</button>
-        <div class="card-icon">${iconContent}</div>
-        <div class="card-content">
-            <h3 class="card-title">${escapeHTML(link.title || 'Sem título')}</h3>
-            <p class="card-description">${escapeHTML(link.description || '')}</p>
+        <div class="card-header-mobile">
+            <div class="card-icon">${iconContent}</div>
+            <div class="card-content">
+                <h3 class="card-title">${escapeHTML(link.title || 'Sem título')}</h3>
+                <p class="card-description">${escapeHTML(link.description || '')}</p>
+                <div class="card-time-mobile">${timeAgoStr}</div>
+            </div>
+            <button class="more-options-btn" type="button">...</button>
+        </div>
+        <div class="card-footer-mobile">
+            <div class="card-tags">${tags}</div>
+            <div class="card-actions-mobile">
+                <button class="action-btn-mobile" type="button">Share</button>
+                <button class="action-btn-mobile edit-card-btn-mobile" type="button">Edit</button>
+                <button class="action-btn-mobile" type="button">More</button>
+            </div>
         </div>
     `;
 
-    // Botão de editar link
-    const editBtn = a.querySelector('.edit-card-btn');
-    if (editBtn) {
-        editBtn.addEventListener('click', (e) => {
+    // Botão de editar link (unificado para mobile e desktop)
+    const editBtnMobile = a.querySelector('.edit-card-btn-mobile');
+    if (editBtnMobile) {
+        editBtnMobile.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             openModalForEdit(link, index);
         });
     }
+
+    // Previne cliques nos outros botões mockados de abrir o link
+    const otherBtns = a.querySelectorAll('.more-options-btn, .action-btn-mobile:not(.edit-card-btn-mobile)');
+    otherBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            showToast("Em breve", "Esta funcionalidade (Share/More) será implementada em breve!", "info");
+        });
+    });
 
     return a;
 }
@@ -659,9 +698,17 @@ function setupUI() {
     if (titleInput) titleInput.addEventListener('input', triggerAutoCategory);
     if (descInput) descInput.addEventListener('input', triggerAutoCategory);
 
-    // Abrir Modal de Novo Link
+    // Abrir Modal de Novo Link (Desktop)
     if (addBtn) {
         addBtn.addEventListener('click', () => {
+            openModalForAdd();
+        });
+    }
+
+    // Abrir Modal de Novo Link (FAB Mobile)
+    const fabAddBtn = document.getElementById('fab-add-link-btn');
+    if (fabAddBtn) {
+        fabAddBtn.addEventListener('click', () => {
             openModalForAdd();
         });
     }
@@ -733,7 +780,12 @@ function setupUI() {
                 icon = await readFileAsBase64(file);
             }
 
-            const updatedLink = { title, description, url, category, icon };
+            let createdAt = new Date().toISOString();
+            if (editingIndex !== null && editingIndex < currentLinks.length && currentLinks[editingIndex].createdAt) {
+                createdAt = currentLinks[editingIndex].createdAt; // Mantém a original se for edição
+            }
+
+            const updatedLink = { title, description, url, category, icon, createdAt };
 
             if (editingIndex !== null && editingIndex >= 0 && editingIndex < currentLinks.length) {
                 // Atualizar link existente

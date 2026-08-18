@@ -32,16 +32,32 @@
     </div>
 
     <main class="container">
-        <header>
+        <!-- Mobile Header (Visible only on mobile) -->
+        <div class="mobile-header" style="display: none;">
+            <div class="mobile-logo">
+                <span class="logo-icon">🔗</span> LinkVault
+            </div>
+            <div class="mobile-actions">
+                <span class="search-icon-mobile" id="mobile-search-toggle">🔍</span>
+                <div class="profile-pic">
+                    <img src="profile_avatar.png" alt="Profile" onerror="this.outerHTML='<span style=\'font-size:1.5rem;\'>👤</span>'">
+                </div>
+            </div>
+        </div>
+        <div class="mobile-greeting" style="display: none;">
+            Welcome, Alex!
+        </div>
+
+        <header class="desktop-header">
             <h1>Meus Links</h1>
             <p>Seus sites favoritos, sempre à mão.</p>
             <p style="color: var(--text-secondary); margin-top: 5px; font-size: 0.9rem;">Por Bruno Serra</p>
 
-            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap;">
-                <button id="add-link-btn" class="add-link-btn" style="margin-top: 0;">+ Adicionar Link</button>
-                <button id="robot-sync-btn" class="add-link-btn" style="margin-top: 0; background: linear-gradient(135deg, #ec4899, #8b5cf6); box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);">🤖 Publicar no Ar</button>
-                <button id="copy-magic-link-btn" class="add-link-btn" style="margin-top: 0; background: #3b82f6;">📱 Ativar Novo Navegador</button>
-                <button id="export-csv-btn" class="add-link-btn" style="margin-top: 0; background: #6366f1;">Baixar CSV</button>
+            <div class="action-bar">
+                <button id="add-link-btn" class="action-btn action-add"><span class="icon">+</span> Adicionar Link</button>
+                <button id="robot-sync-btn" class="action-btn action-robot"><span class="icon">🤖</span> Publicar no Ar</button>
+                <button id="copy-magic-link-btn" class="action-btn action-magic"><span class="icon">📱</span> Ativar Novo Navegador</button>
+                <button id="export-csv-btn" class="action-btn action-export"><span class="icon">⬇️</span> Baixar CSV</button>
             </div>
         </header>
         <!-- Barra de busca e Filtros por Abas -->
@@ -62,6 +78,11 @@
         <div class="dashboard-links-container" id="links-container">
             <!-- Cards de links serão inseridos dinamicamente aqui -->
         </div>
+
+        <!-- FAB Mobile (Floating Action Button) -->
+        <button id="fab-add-link-btn" class="fab-mobile" style="display: none;" title="Add New Link">
+            <span class="fab-icon">+</span> Add New Link
+        </button>
     </main>
 
     <!-- Modal do Robozinho 🤖 (Token GitHub) -->
