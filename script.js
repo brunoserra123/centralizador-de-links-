@@ -1019,7 +1019,7 @@ async function registerBiometrics() {
             },
             pubKeyCredParams: [{alg: -7, type: "public-key"}], // ES256
             authenticatorSelection: {
-                authenticatorAttachment: "platform",
+                // Removido authenticatorAttachment para permitir tanto PC quanto Celular/Bluetooth
                 userVerification: "required"
             },
             timeout: 60000,
