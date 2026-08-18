@@ -1019,6 +1019,7 @@ async function registerBiometrics() {
             },
             pubKeyCredParams: [{alg: -7, type: "public-key"}], // ES256
             authenticatorSelection: {
+                authenticatorAttachment: "platform",
                 userVerification: "required"
             },
             timeout: 60000,
