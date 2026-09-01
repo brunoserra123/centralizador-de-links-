@@ -55,7 +55,12 @@ function normalizeLink(rawLink) {
     const url = link.url || link.link || link.endereco || '';
     const icon = link.icon || link.icone || link.emoji || link.image || link.imagem || '';
     const category = link.category || link.categoria || 'Geral';
-    const createdAt = link.createdat || link.criado_em || link.data || '';
+    let createdAt = link.createdat || link.criado_em || link.data || '';
+    
+    // Fallback: se não tiver data, define como o momento atual
+    if (!createdAt) {
+        createdAt = new Date().toISOString();
+    }
 
     if (!title && !url) return null;
     return { title, description, url, icon, category, createdAt };
@@ -171,6 +176,19 @@ function updateCategoryDatalist() {
     });
 }
 
+function getClickCount(url) {
+    if (!url) return 0;
+    const clicks = JSON.parse(localStorage.getItem('link_clicks') || '{}');
+    return clicks[url] || 0;
+}
+
+function incrementClickCount(url) {
+    if (!url) return;
+    const clicks = JSON.parse(localStorage.getItem('link_clicks') || '{}');
+    clicks[url] = (clicks[url] || 0) + 1;
+    localStorage.setItem('link_clicks', JSON.stringify(clicks));
+}
+
 function createLinkCard(link, index) {
     const a = document.createElement('a');
     
@@ -202,7 +220,9 @@ function createLinkCard(link, index) {
         }
     }
 
-    const tags = link.category ? `<span class="tag">#${link.category.toLowerCase().replace(/\s+/g, '')}</span>` : '';
+    const clicks = getClickCount(finalUrl);
+    const clickBadge = clicks > 0 ? `<span class="tag" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);">🔥 ${clicks}</span>` : '';
+    const tags = (link.category ? `<span class="tag">#${link.category.toLowerCase().replace(/\s+/g, '')}</span>` : '') + clickBadge;
     
     // Calcula a data formatada
     let dateStr = '';
@@ -244,6 +264,12 @@ function createLinkCard(link, index) {
         });
     }
 
+    // Incrementar contagem de cliques
+    a.addEventListener('click', (e) => {
+        if (e.target.closest('button')) return; // Não incrementa se clicar em botões
+        incrementClickCount(finalUrl);
+    });
+
     return a;
 }
 
@@ -263,10 +289,10 @@ function renderLinks() {
     const linksData = getLinks();
 
     // 1. Coletar categorias únicas
-    const categories = ['Todos'];
+    const categories = ['Todos', '🔥 Mais Acessados'];
     linksData.forEach(link => {
         const cat = (link.category && link.category.trim()) ? link.category.trim() : 'Geral';
-        if (!categories.includes(cat)) {
+        if (!categories.includes(cat) && cat !== '🔥 Mais Acessados') {
             categories.push(cat);
         }
     });
@@ -287,19 +313,27 @@ function renderLinks() {
 
     // 3. Filtrar os links com base na aba ativa e na busca
     const cleanSearch = cleanString(searchQuery);
-    const filteredLinks = linksData.filter(link => {
-        // Filtro por Categoria
-        const linkCat = (link.category && link.category.trim()) ? link.category.trim() : 'Geral';
-        const matchesCategory = (activeCategory === 'Todos' || linkCat === activeCategory);
-
-        // Filtro por Busca
+    let filteredLinks = linksData.filter(link => {
         const matchesSearch = !cleanSearch || 
             cleanString(link.title).includes(cleanSearch) || 
             cleanString(link.description).includes(cleanSearch) || 
             cleanString(link.url).includes(cleanSearch);
 
+        if (activeCategory === '🔥 Mais Acessados') {
+            return getClickCount(link.url) > 0 && matchesSearch;
+        }
+
+        // Filtro por Categoria
+        const linkCat = (link.category && link.category.trim()) ? link.category.trim() : 'Geral';
+        const matchesCategory = (activeCategory === 'Todos' || linkCat === activeCategory);
+
         return matchesCategory && matchesSearch;
     });
+
+    // Se estiver em Mais Acessados, ordenar do mais clicado para o menos clicado
+    if (activeCategory === '🔥 Mais Acessados') {
+        filteredLinks.sort((a, b) => getClickCount(b.url) - getClickCount(a.url));
+    }
 
     // 4. Renderizar os cards de links
     container.innerHTML = '';
@@ -423,7 +457,7 @@ async function syncWithRobot() {
 
     try {
         const csvContent = Papa.unparse(currentLinks, {
-            columns: ["title", "description", "url", "icon", "category"]
+            columns: ["title", "description", "url", "icon", "category", "createdAt"]
         });
 
         // 1. Tentar modo HTA/ActiveX se executando localmente com suporte ActiveX
@@ -921,6 +955,7 @@ function initLockScreen() {
         
         fetchLinks();
         setupUI();
+        setTimeout(checkBookmarkletParams, 300);
     };
 
     if (!lockScreen) {
@@ -1074,7 +1109,34 @@ async function unlockWithBiometrics() {
         // Se chegou aqui sem erro, a biometria validou localmente!
         return true;
     } catch (e) {
-        console.error("Erro ao desbloquear com biometria:", e);
+        console.error("Erro no reconhecimento biométrico:", e);
         return false;
+    }
+}
+
+// ==================== BOOKMARKLET (Adição Rápida) ====================
+function checkBookmarkletParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('add') === 'true') {
+        const title = urlParams.get('title') || '';
+        const url = urlParams.get('url') || '';
+        
+        if (title || url) {
+            // Limpa os parâmetros da URL para não re-abrir se atualizar a página
+            window.history.replaceState({}, document.title, window.location.pathname);
+            
+            // Abre o modal
+            const addBtn = document.getElementById('add-link-btn');
+            if (addBtn) addBtn.click();
+            
+            // Preenche os dados no modal
+            setTimeout(() => {
+                const titleInput = document.getElementById('link-title');
+                const urlInput = document.getElementById('link-url');
+                
+                if (titleInput) titleInput.value = title;
+                if (urlInput) urlInput.value = url;
+            }, 100);
+        }
     }
 }
