@@ -1024,17 +1024,29 @@ document.addEventListener('DOMContentLoaded', () => {
     // Botão de Forçar Atualização (Ctrl+F5)
     const forceReloadBtn = document.getElementById('force-reload-btn');
     if (forceReloadBtn) {
-        forceReloadBtn.addEventListener('click', () => {
+        forceReloadBtn.addEventListener('click', async () => {
             forceReloadBtn.innerText = "Atualizando...";
-            if ('caches' in window) {
-                caches.keys().then((names) => {
-                    Promise.all(names.map(name => caches.delete(name))).then(() => {
-                        window.location.href = window.location.pathname + '?reload=' + new Date().getTime();
-                    });
-                });
-            } else {
-                window.location.href = window.location.pathname + '?reload=' + new Date().getTime();
+            
+            // 1. Remover Service Workers antigos (para forçar o download do novo)
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (let registration of registrations) {
+                        await registration.unregister();
+                    }
+                } catch(e) {}
             }
+            
+            // 2. Limpar Cache Storage (arquivos estáticos guardados)
+            if ('caches' in window) {
+                try {
+                    const names = await caches.keys();
+                    await Promise.all(names.map(name => caches.delete(name)));
+                } catch(e) {}
+            }
+            
+            // 3. Recarregar a página com parâmetro para mostrar o Toast
+            window.location.href = window.location.pathname + '?reload=' + new Date().getTime();
         });
     }
 
