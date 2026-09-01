@@ -1021,6 +1021,23 @@ document.addEventListener('DOMContentLoaded', () => {
         registerBioBtn.addEventListener('click', registerBiometrics);
     }
 
+    // Botão de Forçar Atualização (Ctrl+F5)
+    const forceReloadBtn = document.getElementById('force-reload-btn');
+    if (forceReloadBtn) {
+        forceReloadBtn.addEventListener('click', () => {
+            forceReloadBtn.innerText = "Atualizando...";
+            if ('caches' in window) {
+                caches.keys().then((names) => {
+                    Promise.all(names.map(name => caches.delete(name))).then(() => {
+                        window.location.href = window.location.pathname + '?reload=' + new Date().getTime();
+                    });
+                });
+            } else {
+                window.location.href = window.location.pathname + '?reload=' + new Date().getTime();
+            }
+        });
+    }
+
     // Inicia a verificação da tela de bloqueio (ela vai processar o token do link mágico se houver)
     initLockScreen();
 });
