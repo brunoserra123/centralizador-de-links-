@@ -955,7 +955,7 @@ function initLockScreen() {
         
         fetchLinks();
         setupUI();
-        setTimeout(checkBookmarkletParams, 300);
+        setTimeout(checkUrlParams, 300);
     };
 
     if (!lockScreen) {
@@ -1131,26 +1131,65 @@ async function unlockWithBiometrics() {
     }
 }
 
-// ==================== BOOKMARKLET (Adição Rápida) ====================
-function checkBookmarkletParams() {
+// ==================== TOAST E MENSAGENS ====================
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.innerHTML = message;
+    Object.assign(toast.style, {
+        position: 'fixed',
+        bottom: '30px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        background: 'rgba(16, 185, 129, 0.9)',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(16, 185, 129, 0.3)',
+        color: '#fff',
+        padding: '12px 24px',
+        borderRadius: '50px',
+        boxShadow: '0 8px 32px rgba(16, 185, 129, 0.2)',
+        zIndex: '10000',
+        fontWeight: '600',
+        fontSize: '0.95rem',
+        opacity: '0',
+        transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out',
+        pointerEvents: 'none'
+    });
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateX(-50%) translateY(-10px)';
+    }, 10);
+    
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(-50%) translateY(10px)';
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+
+// ==================== VERIFICAR PARÂMETROS DE URL ====================
+function checkUrlParams() {
     const urlParams = new URLSearchParams(window.location.search);
+    
+    // 1. Verifica se veio de uma atualização forçada
+    if (urlParams.has('reload')) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+        showToast("✨ Atualização e melhorias aplicadas com sucesso!");
+    }
+    
+    // 2. Verifica se veio do Bookmarklet
     if (urlParams.get('add') === 'true') {
         const title = urlParams.get('title') || '';
         const url = urlParams.get('url') || '';
         
         if (title || url) {
-            // Limpa os parâmetros da URL para não re-abrir se atualizar a página
             window.history.replaceState({}, document.title, window.location.pathname);
-            
-            // Abre o modal
             const addBtn = document.getElementById('add-link-btn');
             if (addBtn) addBtn.click();
-            
-            // Preenche os dados no modal
             setTimeout(() => {
                 const titleInput = document.getElementById('link-title');
                 const urlInput = document.getElementById('link-url');
-                
                 if (titleInput) titleInput.value = title;
                 if (urlInput) urlInput.value = url;
             }, 100);
