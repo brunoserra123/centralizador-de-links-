@@ -992,16 +992,34 @@ function initLockScreen() {
         if (!pass) return;
         
         unlockBtn.innerText = "Verificando...";
-        const hashed = await hashPassword(pass);
         
-        if (hashed === SECRET_HASH) {
-            onUnlockSuccess();
-        } else {
-            errorMsg.style.display = 'block';
-            passwordInput.value = '';
-            passwordInput.focus();
-            unlockBtn.innerText = "Desbloquear";
+        try {
+            if (window.crypto && window.crypto.subtle) {
+                const hashed = await hashPassword(pass);
+                if (hashed === SECRET_HASH) {
+                    onUnlockSuccess();
+                    return;
+                }
+            } else {
+                // Fallback para ambiente local (file://) onde o crypto.subtle não funciona
+                if (pass === "euseiasenha") {
+                    onUnlockSuccess();
+                    return;
+                }
+            }
+        } catch (err) {
+            console.error("Erro ao verificar senha:", err);
+            // Fallback em caso de erro na API de crypto
+            if (pass === "euseiasenha") {
+                onUnlockSuccess();
+                return;
+            }
         }
+        
+        errorMsg.style.display = 'block';
+        passwordInput.value = '';
+        passwordInput.focus();
+        unlockBtn.innerText = "Desbloquear";
     };
 
     unlockBtn.addEventListener('click', tryUnlock);

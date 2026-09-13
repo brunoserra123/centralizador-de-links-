@@ -725,6 +725,13 @@ header p {
 .lock-title {
     margin-bottom: 0.5rem;
     font-size: 1.6rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.lock-text {
     background: linear-gradient(135deg, #fff, #9ca3af);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
