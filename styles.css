@@ -946,3 +946,47 @@ header p {
         font-weight: 300;
     }
 }
+
+
+/* ===== Acessibilidade e pequenos extras ===== */
+:focus-visible {
+    outline: 2px solid #06b6d4;
+    outline-offset: 2px;
+}
+
+input:focus-visible, textarea:focus-visible {
+    outline: none; /* esses já têm destaque próprio */
+}
+
+.toast-action {
+    align-self: flex-start;
+    margin-top: 0.5rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.toast-action:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.toast-url-box {
+    word-break: break-all;
+}
+
+.toast-message.info { border-left: 5px solid #3b82f6; }
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

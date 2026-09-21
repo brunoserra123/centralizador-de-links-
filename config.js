@@ -1,15 +1,12 @@
 // Configuração do Robozinho 🤖
+// ATENÇÃO: este arquivo é PÚBLICO (vai para o GitHub Pages). Nunca coloque token aqui.
+// O token fica só no navegador (localStorage) ou no config.local.js (ignorado pelo git).
 window.ROBOT_CONFIG = {
-    // Token do GitHub dividido em partes para evitar o scanner automático do GitHub
-    TOKEN_PARTS: ["ghp_POAlU5MKEF", "pcKoSx753L6", "BInK3K6I115ZXNu"],
     OWNER: "brunoserra123",
     REPO: "centralizador-de-links-",
 
-    // Retorna o token configurado no arquivo ou do localStorage
+    // Retorna o token salvo neste navegador
     getToken: function() {
-        if (this.TOKEN_PARTS && this.TOKEN_PARTS.length > 0) {
-            return this.TOKEN_PARTS.join('');
-        }
         return localStorage.getItem('gh_token') || "";
     }
 };
