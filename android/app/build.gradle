@@ -1,0 +1,38 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'io.github.brunoserra123.centralizador'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'io.github.brunoserra123.centralizador'
+        minSdk 24
+        targetSdk 34
+        versionCode Integer.parseInt(System.getenv('VERSION_CODE') ?: '1')
+        versionName "1.0.${System.getenv('VERSION_CODE') ?: '1'}"
+    }
+
+    // Chave fixa para que cada APK novo instale por cima do anterior
+    signingConfigs {
+        app {
+            storeFile file('app-signing.keystore')
+            storePassword 'centralizador'
+            keyAlias 'centralizador'
+            keyPassword 'centralizador'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.app
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'linkvault-v4';
+const CACHE_NAME = 'linkvault-v5';
 
 // Arquivos que existem no site publicado (config.local.js NÃO entra: é ignorado pelo git e dá 404 no GitHub Pages)
 const urlsToCache = [
