@@ -1120,6 +1120,24 @@ function initLockScreen() {
         return;
     }
 
+    // Suporte ao desbloqueio rápido vindo da Extensão de Navegador (#pass=...)
+    try {
+        if (window.location.hash.startsWith('#pass=')) {
+            const rawPass = decodeURIComponent(window.location.hash.substring(6));
+            const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + window.location.search;
+            window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+
+            (async () => {
+                try {
+                    if ((await hashPassword(rawPass)) === SECRET_HASH) {
+                        onUnlockSuccess();
+                        return;
+                    }
+                } catch (e) { /* ignora */ }
+            })();
+        }
+    } catch (e) { /* ignora */ }
+
     // Botão de biometria (se já houver registro neste aparelho)
     const biometricsBtn = document.getElementById('unlock-biometrics-btn');
     if (biometricsBtn && localStorage.getItem('webauthn_cred_id')) {

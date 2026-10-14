@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "LinkVault — Acesso Rápido",
+  "version": "1.0.0",
+  "description": "Acesso rápido e seguro ao LinkVault sem precisar digitar o link toda vez. Digite a senha direto no popup ou abra o site.",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    },
+    "default_title": "LinkVault — Acesso Rápido"
+  },
+  "permissions": [
+    "storage",
+    "tabs",
+    "activeTab"
+  ],
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Alt+L",
+        "mac": "Alt+L"
+      },
+      "description": "Abrir LinkVault"
+    }
+  }
+}

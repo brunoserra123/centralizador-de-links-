@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkVault — Acesso Rápido</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="popup-container">
+        <!-- Cabeçalho -->
+        <header class="header">
+            <div class="logo-area">
+                <span class="logo-icon">🔗</span>
+                <div class="logo-text">
+                    <h1>LinkVault</h1>
+                    <span class="author-tag">Por Bruno Serra</span>
+                </div>
+            </div>
+            <span class="version-badge">v1.0</span>
+        </header>
+
+        <!-- Modo com senha já salva -->
+        <div id="saved-state-container" class="card-section" style="display: none;">
+            <div class="saved-badge">
+                <span class="badge-dot"></span>
+                <span>Senha salva com segurança</span>
+            </div>
+            <p class="saved-desc">Pronto para entrar direto com 1 clique.</p>
+            <button id="quick-open-btn" class="btn btn-primary btn-pulse">
+                <span>🚀 Entrar no LinkVault</span>
+            </button>
+            <div class="forget-link-wrapper">
+                <button id="forget-pass-btn" class="btn-link">Alterar ou esquecer senha salva</button>
+            </div>
+        </div>
+
+        <!-- Modo de digitação de senha -->
+        <div id="input-state-container" class="card-section">
+            <div class="input-header">
+                <span class="lock-icon">🔒</span>
+                <span class="input-label">Digite sua senha de acesso</span>
+            </div>
+            <div class="password-wrapper">
+                <input type="password" id="popup-password" placeholder="Sua senha..." autofocus autocomplete="current-password">
+                <button type="button" id="toggle-pass-visibility" class="toggle-eye" title="Mostrar/ocultar senha">👁️</button>
+            </div>
+            <label class="remember-option">
+                <input type="checkbox" id="remember-password">
+                <span class="custom-checkbox"></span>
+                <span class="remember-label">Lembrar senha neste computador</span>
+            </label>
+            <button id="unlock-open-btn" class="btn btn-primary">
+                <span>🔓 Desbloquear & Abrir</span>
+            </button>
+            <p id="error-message" class="error-msg" style="display: none;">Senha incorreta. Tente novamente.</p>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Ações Adicionais -->
+        <div class="secondary-actions">
+            <button id="open-direct-btn" class="btn btn-secondary" title="Abre o site diretamente (onde pede a senha na página)">
+                <span class="btn-icon">🌐</span>
+                <span>Abrir Site Diretamente</span>
+            </button>
+            <button id="save-current-tab-btn" class="btn btn-secondary" title="Salva o link da aba que você está navegando agora">
+                <span class="btn-icon">🔖</span>
+                <span>Salvar Esta Aba no Vault</span>
+            </button>
+        </div>
+
+        <!-- Rodapé com dica de atalho -->
+        <footer class="footer">
+            <span>Dica: Use <kbd>Alt + L</kbd> para abrir esta extensão</span>
+        </footer>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
