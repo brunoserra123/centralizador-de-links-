@@ -340,21 +340,29 @@ function createLinkCard(link, index) {
     }
 
     a.innerHTML = `
-        <div class="card-header-mobile">
+        <div class="card-top">
             <div class="card-icon">${iconContent}</div>
-            <div class="card-content">
-                <h3 class="card-title">${escapeHTML(link.title || 'Sem título')}</h3>
-                <p class="card-description">${escapeHTML(link.description || '')}</p>
-                <div class="card-time-mobile">${escapeHTML(dateStr)}</div>
+            <div class="card-actions-top">
+                <button class="icon-btn share-card-btn" type="button" title="Compartilhar / Copiar Link" aria-label="Compartilhar">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                </button>
+                <button class="icon-btn edit-card-btn-mobile more-options-btn" type="button" title="Editar Link" aria-label="Editar">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                </button>
             </div>
-            <button class="more-options-btn" type="button" aria-label="Editar link" title="Editar">...</button>
         </div>
-        <div class="card-footer-mobile">
-            <div class="card-tags">${tags}</div>
-            <div class="card-actions-mobile">
-                <button class="action-btn-mobile edit-card-btn-mobile" type="button">Edit</button>
-                <button class="action-btn-mobile share-card-btn" type="button">Share</button>
+        <div class="card-body">
+            <div class="card-title-row">
+                <h3 class="card-title">${escapeHTML(link.title || 'Sem título')}</h3>
+                <span class="card-arrow" aria-hidden="true">↗</span>
             </div>
+            <p class="card-description">${escapeHTML(link.description || 'Sem descrição cadastrada.')}</p>
+        </div>
+        <div class="card-footer">
+            <div class="card-tags">
+                ${tags}
+            </div>
+            ${dateStr ? `<span class="card-date" title="${escapeHTML(dateStr)}">${escapeHTML(dateStr)}</span>` : ''}
         </div>
     `;
 
@@ -380,6 +388,22 @@ function createLinkCard(link, index) {
     return a;
 }
 
+
+function updateBentoStats(allLinks, categories) {
+    const totalLinksEl = document.getElementById('stat-total-links');
+    const totalCatsEl = document.getElementById('stat-total-categories');
+    const totalClicksEl = document.getElementById('stat-total-clicks');
+
+    if (totalLinksEl) totalLinksEl.innerText = allLinks.length;
+    if (totalCatsEl) totalCatsEl.innerText = Math.max(0, categories.length - 2);
+
+    if (totalClicksEl) {
+        const clicksData = loadJSON('link_clicks', {});
+        const sum = Object.values(clicksData).reduce((a, b) => a + (Number(b) || 0), 0);
+        totalClicksEl.innerText = sum;
+    }
+}
+
 function renderLinks() {
     const container = document.getElementById('links-container');
     const tabsContainer = document.getElementById('tabs-container');
@@ -396,6 +420,9 @@ function renderLinks() {
 
     // Se a categoria ativa sumiu (ex.: excluiu o último link dela), volta para "Todos"
     if (!categories.includes(activeCategory)) activeCategory = 'Todos';
+
+    // Atualiza contadores Bento
+    updateBentoStats(linksData, categories);
 
     // 2. Abas
     tabsContainer.innerHTML = '';
@@ -844,6 +871,50 @@ function setupUI() {
     });
 
     if (robotSyncBtn) robotSyncBtn.addEventListener('click', () => syncWithRobot());
+
+    // Dropdown de Ferramentas / Mais Opções
+    const toolsBtn = document.getElementById('tools-menu-btn');
+    const toolsMenu = document.getElementById('tools-menu-dropdown');
+    if (toolsBtn && toolsMenu) {
+        toolsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = toolsMenu.classList.toggle('active');
+            toolsBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+        document.addEventListener('click', (e) => {
+            if (!toolsMenu.contains(e.target) && e.target !== toolsBtn) {
+                toolsMenu.classList.remove('active');
+                toolsBtn.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+
+    // Botão Limpar Busca
+    const searchClearBtn = document.getElementById('search-clear-btn');
+    if (searchInput && searchClearBtn) {
+        searchInput.addEventListener('input', () => {
+            searchClearBtn.style.display = searchInput.value.length > 0 ? 'block' : 'none';
+        });
+        searchClearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            searchQuery = '';
+            searchClearBtn.style.display = 'none';
+            searchInput.focus();
+            renderLinks();
+        });
+    }
+
+    // Clique no Stat Mais Acessados
+    const statPopular = document.getElementById('stat-card-popular');
+    if (statPopular) {
+        statPopular.addEventListener('click', () => {
+            activeCategory = MOST_ACCESSED;
+            renderLinks();
+            const tabsEl = document.getElementById('tabs-container');
+            if (tabsEl) tabsEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+    }
+
 
     // Ativar Novo Navegador 📱 (Link Mágico)
     const copyMagicLinkBtn = document.getElementById('copy-magic-link-btn');
